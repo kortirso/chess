@@ -5,12 +5,17 @@ defmodule Chess.Game do
 
   defstruct squares: nil
 
-  alias Chess.{Game}
+  alias Chess.{Game, Square}
 
   @doc """
   Creates a game 
   """
   def new() do
-    %Game{}
+    Chess.Square.prepare_for_new_game()
+    |> Game.new()
+  end
+
+  def new(squares) do
+    %Game{squares: squares}
   end
 end

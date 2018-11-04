@@ -1,6 +1,6 @@
-# ChessGame
+# Chess
 
-ChessGame package for playing chess, with game logics, validations.
+Chess package for playing chess, with game logics, validations.
 
 ## Installation
 
