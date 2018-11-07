@@ -21,9 +21,9 @@ defmodule Chess.Game do
 
   @doc """
   Makes a play
-  Move represents like e2e4
+  Move represents like e2-e4
   """
-  def play(%Game{squares: squares} = game, move) do
-    {result, squares} = Move.new(squares, move)
+  def play(%Game{squares: squares}, move) do
+    Move.new(squares, move)
   end
 end
