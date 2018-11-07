@@ -29,7 +29,7 @@ defmodule Chess.Move do
 
       check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure)
     rescue
-      error -> {:error, error}
+      error -> {:error, error.message}
     end
   end
 
@@ -53,7 +53,7 @@ defmodule Chess.Move do
       raise "You need to move figure somewhere"
     end
 
-    check_figure_route(figure, route)
+    check_figure_route(figure, route, String.split(move_from, "", trim: true))
     [route, distance]
   end
 
