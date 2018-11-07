@@ -29,10 +29,6 @@ defmodule Chess.Move.Destination do
         squares = Keyword.put(squares, :"#{move_to}", figure)
         {:ok, squares}
       end
-
-      defp pion_diagonal_attack(squares, move_from, move_to, %Figure{color: color, type: type}) do
-        
-      end
     end
   end
 end

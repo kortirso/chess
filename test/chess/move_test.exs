@@ -7,6 +7,35 @@ defmodule Chess.MoveTest do
     {:ok, game: Game.new([{:a2, Figure.new("white", "p")}, {:b3, Figure.new("white", "p")}, {:e2, Figure.new("white", "p")}, {:a4, Figure.new("black", "p")}, {:b7, Figure.new("black", "p")}, {:g5, Figure.new("white", "p")}, {:h6, Figure.new("black", "p")}, {:g7, Figure.new("black", "p")}])}
   end
 
+  describe "for move format" do
+    test "without -", state do
+      {status, message} = Game.play(state[:game], "e2e3")
+
+      assert status == :error
+      assert message == "Invalid move format"
+    end
+
+    test "with invalid format", state do
+      {status, message} = Game.play(state[:game], "e-e3")
+
+      assert status == :error
+      assert message == "Invalid move format"
+    end
+
+    test "with invalid square", state do
+      {status, message} = Game.play(state[:game], "k3-r5")
+
+      assert status == :error
+      assert message == "There is no such square on the board"
+    end
+
+    test "with valid square", state do
+      {status, _message} = Game.play(state[:game], "e2-e3")
+
+      assert status == :ok
+    end
+  end
+
   describe "for white pions" do
     test "to 1 square forward, without barrier", state do
       {status, _message} = Game.play(state[:game], "e2-e3")

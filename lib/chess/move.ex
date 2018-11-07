@@ -8,6 +8,7 @@ defmodule Chess.Move do
 
   alias Chess.{Move}
 
+  use Move.Parse
   use Move.FigureRoute
   use Move.Barriers
   use Move.Destination
@@ -34,7 +35,9 @@ defmodule Chess.Move do
   end
 
   defp parse_move(move) do
-    String.split(move, "-")
+    move
+    |> check_move_format()
+    |> String.split("-")
   end
 
   defp find_figure(figure) when figure == nil do
