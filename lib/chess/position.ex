@@ -9,4 +9,11 @@ defmodule Chess.Position do
   def new() do
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   end
+
+  @doc """
+  Calculate FEN-notation for current board
+  """
+  def new(_squares, current_fen) do
+    current_fen
+  end
 end

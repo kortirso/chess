@@ -6,7 +6,7 @@ defmodule Chess.Move do
   @x_fields ["a", "b", "c", "d", "e", "f", "g", "h"]
   @y_fields ["1", "2", "3", "4", "5", "6", "7", "8"]
 
-  alias Chess.{Game, Move}
+  alias Chess.{Game, Move, Position}
 
   use Move.Parse
   use Move.FigureRoute
@@ -16,7 +16,7 @@ defmodule Chess.Move do
   @doc """
   Makes new move
   """
-  def new(%Game{squares: squares}, move) do
+  def new(%Game{squares: squares, current_fen: current_fen, history: history}, move) do
     try do
       [move_from, move_to] = parse_move(move)
 
@@ -30,7 +30,13 @@ defmodule Chess.Move do
 
       squares = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure)
 
-      {:ok, %Game{squares: squares, current_fen: ""}}
+      {:ok,
+        %Game{
+          squares: squares,
+          current_fen: Position.new(squares, current_fen),
+          history: Enum.concat(history, %{fen: current_fen, move: move})
+        }
+      }
     rescue
       error -> {:error, error.message}
     end
