@@ -19,15 +19,13 @@ defmodule Chess.Move.Destination do
             raise "Pion must attack for diagonal move"
           true ->
             squares = Keyword.delete(squares, :"#{move_from}")
-            squares = Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
-            squares
+            Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
         end
       end
 
       defp check_destination(squares, move_from, move_to, _figure_at_the_end, figure) do
         squares = Keyword.delete(squares, :"#{move_from}")
-        squares = Keyword.put(squares, :"#{move_to}", figure)
-        squares
+        Keyword.put(squares, :"#{move_to}", figure)
       end
     end
   end
