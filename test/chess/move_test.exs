@@ -4,7 +4,9 @@ defmodule Chess.MoveTest do
   alias Chess.{Game, Figure}
 
   setup_all do
-    {:ok, game: Game.new([{:a2, Figure.new("white", "p")}, {:b3, Figure.new("white", "p")}, {:e2, Figure.new("white", "p")}, {:a4, Figure.new("black", "p")}, {:b7, Figure.new("black", "p")}, {:g5, Figure.new("white", "p")}, {:h6, Figure.new("black", "p")}, {:g7, Figure.new("black", "p")}])}
+    game_with_pions = Game.new([{:a2, Figure.new("white", "p")}, {:b3, Figure.new("white", "p")}, {:e2, Figure.new("white", "p")}, {:a4, Figure.new("black", "p")}, {:b7, Figure.new("black", "p")}, {:g5, Figure.new("white", "p")}, {:h6, Figure.new("black", "p")}, {:g7, Figure.new("black", "p")}])
+    figures_game = Game.new([{:a1, Figure.new("white", "r")}, {:b1, Figure.new("white", "n")}, {:c1, Figure.new("white", "b")}, {:d1, Figure.new("white", "q")}, {:e1, Figure.new("white", "k")}, {:a8, Figure.new("black", "r")}, {:b8, Figure.new("black", "n")}, {:c8, Figure.new("black", "b")}, {:d8, Figure.new("black", "q")}, {:e8, Figure.new("black", "k")}])
+    {:ok, game: game_with_pions, figures_game: figures_game}
   end
 
   describe "for move format" do
@@ -186,6 +188,75 @@ defmodule Chess.MoveTest do
 
       assert status == :error
       assert message == "Pion can not move like this"
+    end
+  end
+
+  describe "for rooks" do
+    test "for line moves, without barrier, without attack", state do
+      {status, squares} = Game.play(state[:figures_game], "a1-a7")
+
+      assert status == :ok
+
+      second_move_game = Game.new(squares)
+
+      {status, _message} = Game.play(second_move_game, "a7-h7")
+
+      assert status == :ok
+    end
+
+    test "for line move, without barrier, with attack", state do
+      {status, _message} = Game.play(state[:figures_game], "a1-a8")
+
+      assert status == :ok
+    end
+
+    test "for line move, with barrier", state do
+      {status, message} = Game.play(state[:figures_game], "a1-b1")
+
+      assert status == :error
+      assert message == "Square b1 is under control of your figure"
+    end
+
+    test "for diagonal move", state do
+      {status, message} = Game.play(state[:figures_game], "a1-c3")
+
+      assert status == :error
+      assert message == "Rook can not move like this"
+    end
+
+    test "like Knight", state do
+      {status, message} = Game.play(state[:figures_game], "a1-c3")
+
+      assert status == :error
+      assert message == "Rook can not move like this"
+    end
+  end
+
+  describe "for knights" do
+    test "like Knight", state do
+      {status, _message} = Game.play(state[:figures_game], "b1-c3")
+
+      assert status == :ok
+    end
+
+    test "for line move", state do
+      {status, message} = Game.play(state[:figures_game], "b1-b3")
+
+      assert message == "Knight can not move like this"
+    end
+
+    test "for line move, with barrier", state do
+      {status, message} = Game.play(state[:figures_game], "b1-c1")
+
+      assert status == :error
+      assert message == "Knight can not move like this"
+    end
+
+    test "for diagonal move", state do
+      {status, message} = Game.play(state[:figures_game], "b1-d3")
+
+      assert status == :error
+      assert message == "Knight can not move like this"
     end
   end
 end

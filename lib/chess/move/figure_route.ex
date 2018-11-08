@@ -19,8 +19,8 @@ defmodule Chess.Move.FigureRoute do
         end
       end
 
-      defp check_figure_route(%Figure{type: type}, [x_route, y_route], _move_from) when type == "n" do
-        if abs(x_route) == 2 && abs(y_route) != 1 || abs(x_route) == 1 && abs(y_route) != 2 do
+      defp check_figure_route(%Figure{type: type}, route, _move_from) when type == "n" do
+        unless knight_move(route) do
           raise "Knight can not move like this"
         end
       end
@@ -59,6 +59,10 @@ defmodule Chess.Move.FigureRoute do
 
       defp diagonal_move([x_route, y_route]) do
         abs(x_route) == abs(y_route)
+      end
+
+      defp knight_move([x_route, y_route]) do
+        abs(x_route) == 2 && abs(y_route) == 1 || abs(x_route) == 1 && abs(y_route) == 2
       end
     end
   end
