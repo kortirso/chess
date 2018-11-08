@@ -20,14 +20,14 @@ defmodule Chess.Move.Destination do
           true ->
             squares = Keyword.delete(squares, :"#{move_from}")
             squares = Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
-            {:ok, squares}
+            squares
         end
       end
 
       defp check_destination(squares, move_from, move_to, _figure_at_the_end, figure) do
         squares = Keyword.delete(squares, :"#{move_from}")
         squares = Keyword.put(squares, :"#{move_to}", figure)
-        {:ok, squares}
+        squares
       end
     end
   end

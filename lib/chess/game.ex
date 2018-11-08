@@ -3,27 +3,27 @@ defmodule Chess.Game do
   Game module
   """
 
-  defstruct squares: nil
+  defstruct squares: nil, current_fen: ""
 
-  alias Chess.{Game, Square, Move}
+  alias Chess.{Game, Square, Move, Position}
 
   @doc """
   Creates a game
   """
   def new() do
     Square.prepare_for_new_game()
-    |> Game.new()
+    |> Game.new(Position.new())
   end
 
-  def new(squares) do
-    %Game{squares: squares}
+  def new(squares, current_fen \\ "") do
+    %Game{squares: squares, current_fen: current_fen}
   end
 
   @doc """
   Makes a play
   Move represents like e2-e4
   """
-  def play(%Game{squares: squares}, move) do
-    Move.new(squares, move)
+  def play(game, move) do
+    Move.new(game, move)
   end
 end

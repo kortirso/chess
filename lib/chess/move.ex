@@ -6,7 +6,7 @@ defmodule Chess.Move do
   @x_fields ["a", "b", "c", "d", "e", "f", "g", "h"]
   @y_fields ["1", "2", "3", "4", "5", "6", "7", "8"]
 
-  alias Chess.{Move}
+  alias Chess.{Game, Move}
 
   use Move.Parse
   use Move.FigureRoute
@@ -16,7 +16,7 @@ defmodule Chess.Move do
   @doc """
   Makes new move
   """
-  def new(squares, move) do
+  def new(%Game{squares: squares}, move) do
     try do
       [move_from, move_to] = parse_move(move)
 
@@ -28,7 +28,9 @@ defmodule Chess.Move do
         check_barriers_on_route(squares, move_from, route, distance)
       end
 
-      check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure)
+      squares = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure)
+
+      {:ok, %Game{squares: squares, current_fen: ""}}
     rescue
       error -> {:error, error.message}
     end
