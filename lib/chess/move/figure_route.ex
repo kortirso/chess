@@ -39,7 +39,7 @@ defmodule Chess.Move.FigureRoute do
 
       defp check_figure_route(%Figure{type: type}, [x_route, y_route], _move_from) when type == "k" do
         possible = [-1, 0, 1]
-        if x_route in possible && y_route in possible do
+        unless x_route in possible && y_route in possible do
           raise "King can not move like this"
         end
       end

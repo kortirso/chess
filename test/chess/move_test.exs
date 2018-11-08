@@ -5,7 +5,7 @@ defmodule Chess.MoveTest do
 
   setup_all do
     game_with_pions = Game.new([{:a2, Figure.new("white", "p")}, {:b3, Figure.new("white", "p")}, {:e2, Figure.new("white", "p")}, {:a4, Figure.new("black", "p")}, {:b7, Figure.new("black", "p")}, {:g5, Figure.new("white", "p")}, {:h6, Figure.new("black", "p")}, {:g7, Figure.new("black", "p")}])
-    figures_game = Game.new([{:a1, Figure.new("white", "r")}, {:b1, Figure.new("white", "n")}, {:c1, Figure.new("white", "b")}, {:d1, Figure.new("white", "q")}, {:e1, Figure.new("white", "k")}, {:a8, Figure.new("black", "r")}, {:b8, Figure.new("black", "n")}, {:c8, Figure.new("black", "b")}, {:d8, Figure.new("black", "q")}, {:e8, Figure.new("black", "k")}])
+    figures_game = Game.new([{:a1, Figure.new("white", "r")}, {:b1, Figure.new("white", "n")}, {:c1, Figure.new("white", "b")}, {:d1, Figure.new("white", "q")}, {:e1, Figure.new("white", "k")}, {:a7, Figure.new("black", "r")}, {:c3, Figure.new("black", "n")}, {:g5, Figure.new("black", "b")}, {:d6, Figure.new("black", "q")}, {:e8, Figure.new("black", "k")}])
     {:ok, game: game_with_pions, figures_game: figures_game}
   end
 
@@ -193,24 +193,31 @@ defmodule Chess.MoveTest do
 
   describe "for rooks" do
     test "for line moves, without barrier, without attack", state do
-      {status, squares} = Game.play(state[:figures_game], "a1-a7")
+      {status, squares} = Game.play(state[:figures_game], "a1-a6")
 
       assert status == :ok
 
       second_move_game = Game.new(squares)
 
-      {status, _message} = Game.play(second_move_game, "a7-h7")
+      {status, _message} = Game.play(second_move_game, "a6-c6")
 
       assert status == :ok
     end
 
     test "for line move, without barrier, with attack", state do
-      {status, _message} = Game.play(state[:figures_game], "a1-a8")
+      {status, _message} = Game.play(state[:figures_game], "a1-a7")
 
       assert status == :ok
     end
 
     test "for line move, with barrier", state do
+      {status, message} = Game.play(state[:figures_game], "a1-a8")
+
+      assert status == :error
+      assert message == "There is barrier at square a7"
+    end
+
+    test "for line move, with own barrier", state do
       {status, message} = Game.play(state[:figures_game], "a1-b1")
 
       assert status == :error
@@ -234,6 +241,12 @@ defmodule Chess.MoveTest do
 
   describe "for knights" do
     test "like Knight", state do
+      {status, _message} = Game.play(state[:figures_game], "b1-a3")
+
+      assert status == :ok
+    end
+
+    test "like Knight, with attack", state do
       {status, _message} = Game.play(state[:figures_game], "b1-c3")
 
       assert status == :ok
@@ -242,6 +255,7 @@ defmodule Chess.MoveTest do
     test "for line move", state do
       {status, message} = Game.play(state[:figures_game], "b1-b3")
 
+      assert status == :error
       assert message == "Knight can not move like this"
     end
 
@@ -257,6 +271,102 @@ defmodule Chess.MoveTest do
 
       assert status == :error
       assert message == "Knight can not move like this"
+    end
+  end
+
+  describe "for bishop" do
+    test "for diagonal move, without barrier", state do
+      {status, _message} = Game.play(state[:figures_game], "c1-f4")
+
+      assert status == :ok
+    end
+
+    test "for diagonal move, with attack", state do
+      {status, _message} = Game.play(state[:figures_game], "c1-g5")
+
+      assert status == :ok
+    end
+
+    test "for diagonal move, with barrier", state do
+      {status, message} = Game.play(state[:figures_game], "c1-h6")
+
+      assert status == :error
+      assert message == "There is barrier at square g5"
+    end
+
+    test "for line move", state do
+      {status, message} = Game.play(state[:figures_game], "c1-c3")
+
+      assert status == :error
+      assert message == "Bishop can not move like this"
+    end
+  end
+
+  describe "for queen" do
+    test "for line moves, without barrier", state do
+      {status, squares} = Game.play(state[:figures_game], "d1-d5")
+
+      assert status == :ok
+
+      second_move_game = Game.new(squares)
+
+      {status, _message} = Game.play(second_move_game, "d5-a5")
+
+      assert status == :ok
+    end
+
+    test "for line move, with attack", state do
+      {status, _message} = Game.play(state[:figures_game], "d1-d6")
+
+      assert status == :ok
+    end
+
+    test "for diagonal move, without barrier", state do
+      {status, _message} = Game.play(state[:figures_game], "d1-f3")
+
+      assert status == :ok
+    end
+
+    test "for line move, with barrier", state do
+      {status, message} = Game.play(state[:figures_game], "d1-d7")
+
+      assert status == :error
+      assert message == "There is barrier at square d6"
+    end
+
+    test "for line move, with own barrier", state do
+      {status, message} = Game.play(state[:figures_game], "d1-e1")
+
+      assert status == :error
+      assert message == "Square e1 is under control of your figure"
+    end
+  end
+
+  describe "for king" do
+    test "for short moves, without barrier", state do
+      {status, squares} = Game.play(state[:figures_game], "e1-e2")
+
+      assert status == :ok
+
+      second_move_game = Game.new(squares)
+
+      {status, _message} = Game.play(second_move_game, "e2-f3")
+
+      assert status == :ok
+    end
+
+    test "for short move, with barrier", state do
+      {status, message} = Game.play(state[:figures_game], "e1-d1")
+
+      assert status == :error
+      assert message == "Square d1 is under control of your figure"
+    end
+
+    test "for long move", state do
+      {status, message} = Game.play(state[:figures_game], "e1-e3")
+
+      assert status == :error
+      assert message == "King can not move like this"
     end
   end
 end
