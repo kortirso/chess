@@ -36,6 +36,21 @@ defmodule Chess.MoveTest do
     end
   end
 
+  describe "for figure presence" do
+    test "figure is exist", state do
+      {status, _message} = Game.play(state[:game], "a2-a3")
+
+      assert status == :ok
+    end
+
+    test "figure is not exist", state do
+      {status, message} = Game.play(state[:game], "a3-a4")
+
+      assert status == :error
+      assert message == "Square does not have figure for move"
+    end
+  end
+
   describe "for white pions" do
     test "to 1 square forward, without barrier", state do
       {status, _message} = Game.play(state[:game], "e2-e3")
