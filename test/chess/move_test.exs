@@ -310,10 +310,6 @@ defmodule Chess.MoveTest do
       assert {:ok, %Game{}} = Game.play(game, "e2-f3")
     end
 
-    test "for castling, short way", state do
-      assert {:ok, %Game{}} = Game.play(state[:figures_game], "0-0")
-    end
-
     test "for short move, with barrier", state do
       {:error, message} = Game.play(state[:figures_game], "e1-d1")
 
@@ -324,6 +320,70 @@ defmodule Chess.MoveTest do
       {:error, message} = Game.play(state[:figures_game], "e1-e3")
 
       assert message == "King can not move like this"
+    end
+  end
+
+  describe "for castling moves, without barriers" do
+    setup _context do
+      squares = [{:a1, %Figure{color: "white", type: "r"}}, {:e1, %Figure{color: "white", type: "k"}}, {:h1, %Figure{color: "white", type: "r"}}, {:a8, %Figure{color: "black", type: "r"}}, {:e8, %Figure{color: "black", type: "k"}}, {:h8, %Figure{color: "black", type: "r"}}]
+      game = %Game{squares: squares}
+      {:ok, game: game}
+    end
+
+    test "short way", state do
+      assert {:ok, game} = Game.play(state[:game], "0-0")
+
+      assert {:ok, %Game{}} = Game.play(game, "0-0")
+    end
+
+    test "long way", state do
+      assert {:ok, game} = Game.play(state[:game], "0-0-0")
+
+      assert {:ok, %Game{}} = Game.play(game, "0-0-0")
+    end
+  end
+
+  describe "for white castling moves, with barriers" do
+    setup _context do
+      squares = [{:a1, %Figure{color: "white", type: "r"}}, {:b1, %Figure{color: "white", type: "r"}}, {:e1, %Figure{color: "white", type: "k"}}, {:f1, %Figure{color: "white", type: "r"}}, {:h1, %Figure{color: "white", type: "r"}}]
+      game = %Game{squares: squares}
+      {:ok, game: game}
+    end
+
+    test "short way", state do
+      assert {:error, message} = Game.play(state[:game], "0-0")
+
+      assert message == "There is barrier at square f1"
+    end
+
+    test "long way", state do
+      assert {:error, message} = Game.play(state[:game], "0-0-0")
+
+      assert message == "There is barrier at square b1"
+    end
+  end
+
+  describe "for black castling moves, with barriers" do
+    setup _context do
+      squares = [{:a1, %Figure{color: "white", type: "r"}}, {:e1, %Figure{color: "white", type: "k"}}, {:h1, %Figure{color: "white", type: "r"}}, {:a8, %Figure{color: "black", type: "r"}}, {:b8, %Figure{color: "black", type: "r"}}, {:e8, %Figure{color: "black", type: "k"}}, {:f8, %Figure{color: "black", type: "r"}}, {:h8, %Figure{color: "black", type: "r"}}]
+      game = %Game{squares: squares}
+      {:ok, game: game}
+    end
+
+    test "short way", state do
+      assert {:ok, game} = Game.play(state[:game], "0-0")
+
+      assert {:error, message} = Game.play(game, "0-0")
+
+      assert message == "There is barrier at square f8"
+    end
+
+    test "long way", state do
+      assert {:ok, game} = Game.play(state[:game], "0-0-0")
+
+      assert {:error, message} = Game.play(game, "0-0-0")
+
+      assert message == "There is barrier at square b8"
     end
   end
 end

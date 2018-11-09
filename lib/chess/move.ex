@@ -32,6 +32,11 @@ defmodule Chess.Move do
         check_barriers_on_route(squares, move_from, route, distance)
       end
 
+      if figure.type == "k" && distance == 2 do
+        [rook_from, rook_route, rook_distance] = define_rook_move_for_castling(move_to)
+        check_barriers_on_route(squares, rook_from, rook_route, rook_distance)
+      end
+
       [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant, distance)
 
       {:ok,
@@ -46,7 +51,7 @@ defmodule Chess.Move do
     end
   end
 
-  defp parse_move(move, active) when move == "0-0" or "0-0-0" do
+  defp parse_move(move, active) when move == "0-0" or move == "0-0-0" do
     [
       define_kings_from(active),
       define_kings_to(active, move)
@@ -120,5 +125,20 @@ defmodule Chess.Move do
     route
     |> Enum.map(fn x -> abs(x) end)
     |> Enum.max
+  end
+
+  defp define_rook_move_for_castling(move_to) do
+    cond do
+      move_to == "g1" ->
+        ["h1", [-2, 0], 2]
+      move_to == "c1" ->
+        ["a1", [3, 0], 3]
+      move_to == "g8" ->
+        ["h8", [-2, 0], 2]
+      move_to == "c8" ->
+        ["a8", [3, 0], 3]
+      true ->
+        ["", [0, 0], 0]
+    end
   end
 end
