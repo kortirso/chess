@@ -32,12 +32,12 @@ defmodule Chess.Move do
         check_barriers_on_route(squares, move_from, route, distance)
       end
 
-      squares = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant)
+      {is_attack, squares} = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant)
 
       {:ok,
         %Game{
           squares: squares,
-          current_fen: Position.new(squares, current_position, figure, distance, move_to) |> Position.to_fen,
+          current_fen: Position.new(squares, current_position, figure, distance, move_to, is_attack) |> Position.to_fen,
           history: Enum.concat(history, %{fen: current_fen, move: move})
         }
       }

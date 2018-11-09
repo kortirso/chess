@@ -18,4 +18,10 @@ defmodule Chess.PositionTest do
 
     assert "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1" = game.current_fen
   end
+
+  test "creates new FEN-notation after move, with half move", state do
+    {:ok, game} = Game.play(state[:game], "b1-a3")
+
+    assert "rnbqkbnr/pppppppp/8/8/8/N7/PPPPPPPP/R1BQKBNR b KQkq - 1 1" = game.current_fen
+  end
 end

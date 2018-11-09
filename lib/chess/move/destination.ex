@@ -18,18 +18,18 @@ defmodule Chess.Move.Destination do
           x_route != 0 && figure_at_the_end == nil && move_to == en_passant ->
             beated_pion = pion_beated_en_passant(color, move_to)
             squares = Keyword.delete(squares, :"#{beated_pion}")
-            Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
+            {true, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})}
           x_route != 0 && figure_at_the_end == nil ->
             raise "Pion must attack for diagonal move"
           true ->
             squares = Keyword.delete(squares, :"#{move_from}")
-            Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
+            {is_attack(squares[:"#{move_to}"]), Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})}
         end
       end
 
       defp check_destination(squares, move_from, move_to, _figure_at_the_end, figure, _en_passant) do
         squares = Keyword.delete(squares, :"#{move_from}")
-        Keyword.put(squares, :"#{move_to}", figure)
+        {is_attack(squares[:"#{move_to}"]), Keyword.put(squares, :"#{move_to}", figure)}
       end
 
       defp pion_beated_en_passant(color, move_to) do
@@ -40,6 +40,14 @@ defmodule Chess.Move.Destination do
         else
           String.first(move_to) <> Enum.at(@y_fields, y_point + 1)
         end
+      end
+
+      defp is_attack(figure) when figure == nil do
+        false
+      end
+
+      defp is_attack(_figure) do
+        true
       end
     end
   end

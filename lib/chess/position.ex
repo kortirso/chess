@@ -22,9 +22,10 @@ defmodule Chess.Position do
   @doc """
   Calculate FEN-notation for current board
   """
-  def new(squares, %Position{active: active, castling: castling, half_move: half_move, full_move: full_move}, figure, distance, move_to) do
+  def new(squares, %Position{active: active, castling: castling, half_move: half_move, full_move: full_move}, figure, distance, move_to, is_attack) do
     position = calc_position_from_squares(squares)
-    %Position{position: position, active: change_active_player(active), castling: castling, en_passant: check_en_passant(figure, distance, move_to), half_move: half_move, full_move: add_full_move(full_move, active)}
+
+    %Position{position: position, active: change_active_player(active), castling: castling, en_passant: check_en_passant(figure, distance, move_to), half_move: check_half_move(half_move, figure, is_attack), full_move: add_full_move(full_move, active)}
   end
 
   def from_fen(current_fen) do
@@ -56,6 +57,14 @@ defmodule Chess.Position do
     else
       "#{String.first(move_to)}#{y_point + 1}"
     end
+  end
+
+  defp check_half_move(_half_move, %Figure{type: type}, is_attack) when type == "p" or is_attack do
+    0
+  end
+
+  defp check_half_move(half_move, _figure, _is_attack) do
+    half_move + 1
   end
 
   defp add_full_move(full_move, active) do
