@@ -5,7 +5,7 @@ defmodule Chess.Game do
 
   alias Chess.{Game, Square, Move, Position}
 
-  defstruct squares: nil, current_fen: Position.new, history: []
+  defstruct squares: nil, current_fen: Position.new |> Position.to_fen, history: []
 
   @doc """
   Creates a game

@@ -8,12 +8,14 @@ defmodule Chess.PositionTest do
   end
 
   test "creates default FEN-notation" do
-    assert "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" = Position.new
+    position = Position.new
+
+    assert "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" = Position.to_fen(position)
   end
 
-  test "creates new FEN-notation", state do
-    {:ok, %Game{squares: squares, current_fen: current_fen}} = Game.play(state[:game], "e2-e4")
+  test "creates new FEN-notation after move", state do
+    {:ok, game} = Game.play(state[:game], "e2-e4")
 
-    assert "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR" = Position.new(squares, current_fen)
+    assert "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1" = game.current_fen
   end
 end

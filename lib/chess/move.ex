@@ -18,9 +18,13 @@ defmodule Chess.Move do
   """
   def new(%Game{squares: squares, current_fen: current_fen, history: history}, move) do
     try do
+      current_position = Position.from_fen(current_fen)
+
       [move_from, move_to] = parse_move(move)
 
       figure = find_figure(squares[:"#{move_from}"])
+
+      check_active_player(figure, current_position.active)
 
       [route, distance] = check_route_for_figure(figure, move_from, move_to)
 
@@ -28,12 +32,12 @@ defmodule Chess.Move do
         check_barriers_on_route(squares, move_from, route, distance)
       end
 
-      squares = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure)
+      squares = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant)
 
       {:ok,
         %Game{
           squares: squares,
-          current_fen: Position.new(squares, current_fen),
+          current_fen: Position.new(squares, current_position, figure, distance, move_to) |> Position.to_fen,
           history: Enum.concat(history, %{fen: current_fen, move: move})
         }
       }
@@ -54,6 +58,12 @@ defmodule Chess.Move do
 
   defp find_figure(figure) do
     figure
+  end
+
+  defp check_active_player(%Figure{color: color}, active) do
+    if String.first(color) != active  do
+      raise "This is not move of #{color} player"
+    end
   end
 
   defp check_route_for_figure(figure, move_from, move_to) do
