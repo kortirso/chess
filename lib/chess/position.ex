@@ -22,10 +22,10 @@ defmodule Chess.Position do
   @doc """
   Calculate FEN-notation for current board
   """
-  def new(squares, %Position{active: active, castling: castling, half_move: half_move, full_move: full_move}, figure, distance, move_to, is_attack) do
+  def new(squares, %Position{active: active, castling: castling, half_move: half_move, full_move: full_move}, figure, distance, move_to, is_attack, is_castling) do
     position = calc_position_from_squares(squares)
 
-    %Position{position: position, active: change_active_player(active), castling: castling, en_passant: check_en_passant(figure, distance, move_to), half_move: check_half_move(half_move, figure, is_attack), full_move: add_full_move(full_move, active)}
+    %Position{position: position, active: change_active_player(active), castling: check_castling(castling, is_castling), en_passant: check_en_passant(figure, distance, move_to), half_move: check_half_move(half_move, figure, is_attack), full_move: add_full_move(full_move, active)}
   end
 
   def from_fen(current_fen) do
@@ -44,6 +44,15 @@ defmodule Chess.Position do
     else
       "w"
     end
+  end
+
+  defp check_castling(castling, is_castling) when is_castling == nil do
+    castling
+  end
+
+  defp check_castling(castling, is_castling) do
+    castling = String.replace(castling, is_castling, "")
+    if castling == "", do: "-", else: castling
   end
 
   defp check_en_passant(%Figure{type: type}, distance, _move_to) when type != "p" or distance != 2 do

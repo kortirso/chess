@@ -5,7 +5,7 @@ defmodule Chess.MoveTest do
 
   setup_all do
     game_with_pions = Game.new([{:a2, Figure.new("white", "p")}, {:b3, Figure.new("white", "p")}, {:e2, Figure.new("white", "p")}, {:a4, Figure.new("black", "p")}, {:d4, Figure.new("black", "p")}, {:b7, Figure.new("black", "p")}, {:g5, Figure.new("white", "p")}, {:h6, Figure.new("black", "p")}, {:g7, Figure.new("black", "p")}])
-    figures_game = Game.new([{:a1, Figure.new("white", "r")}, {:b1, Figure.new("white", "n")}, {:c1, Figure.new("white", "b")}, {:d1, Figure.new("white", "q")}, {:e1, Figure.new("white", "k")}, {:a7, Figure.new("black", "r")}, {:c3, Figure.new("black", "n")}, {:g5, Figure.new("black", "b")}, {:d6, Figure.new("black", "q")}, {:e8, Figure.new("black", "k")}])
+    figures_game = Game.new([{:a1, Figure.new("white", "r")}, {:b1, Figure.new("white", "n")}, {:c1, Figure.new("white", "b")}, {:d1, Figure.new("white", "q")}, {:e1, Figure.new("white", "k")}, {:h1, Figure.new("white", "r")}, {:a7, Figure.new("black", "r")}, {:c3, Figure.new("black", "n")}, {:g5, Figure.new("black", "b")}, {:d6, Figure.new("black", "q")}, {:e8, Figure.new("black", "k")}])
     {:ok, game: game_with_pions, figures_game: figures_game}
   end
 
@@ -308,6 +308,10 @@ defmodule Chess.MoveTest do
       {:ok, game} = Game.play(game, "a7-a8")
 
       assert {:ok, %Game{}} = Game.play(game, "e2-f3")
+    end
+
+    test "for castling, short way", state do
+      assert {:ok, %Game{}} = Game.play(state[:figures_game], "0-0")
     end
 
     test "for short move, with barrier", state do

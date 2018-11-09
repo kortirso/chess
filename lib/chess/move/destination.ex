@@ -6,11 +6,11 @@ defmodule Chess.Move.Destination do
     quote do
       alias Chess.{Figure}
 
-      defp check_destination(_squares, move_from, move_to, %Figure{color: end_color}, %Figure{color: color}, _en_passant) when end_color == color do
+      defp check_destination(_squares, move_from, move_to, %Figure{color: end_color}, %Figure{color: color}, _en_passant, _distance) when end_color == color do
         raise "Square #{move_to} is under control of your figure"
       end
 
-      defp check_destination(squares, move_from, move_to, figure_at_the_end, %Figure{color: color, type: type}, en_passant) when type == "p" do
+      defp check_destination(squares, move_from, move_to, figure_at_the_end, %Figure{color: color, type: type}, en_passant, _distance) when type == "p" do
         [x_route, _y_route] = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
         cond do
           x_route == 0 && figure_at_the_end != nil ->
@@ -18,18 +18,39 @@ defmodule Chess.Move.Destination do
           x_route != 0 && figure_at_the_end == nil && move_to == en_passant ->
             beated_pion = pion_beated_en_passant(color, move_to)
             squares = Keyword.delete(squares, :"#{beated_pion}")
-            {true, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})}
+            [true, nil, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})]
           x_route != 0 && figure_at_the_end == nil ->
             raise "Pion must attack for diagonal move"
           true ->
             squares = Keyword.delete(squares, :"#{move_from}")
-            {is_attack(squares[:"#{move_to}"]), Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})}
+            [is_attack(squares[:"#{move_to}"]), nil, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})]
         end
       end
 
-      defp check_destination(squares, move_from, move_to, _figure_at_the_end, figure, _en_passant) do
+      defp check_destination(squares, move_from, move_to, _figure_at_the_end, %Figure{color: color, type: type}, _en_passant, distance) when type == "k" and distance == 2 do
         squares = Keyword.delete(squares, :"#{move_from}")
-        {is_attack(squares[:"#{move_to}"]), Keyword.put(squares, :"#{move_to}", figure)}
+        squares = Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
+        cond do
+          move_to == "g1" ->
+            squares = Keyword.put(squares, :f1, squares[:h1])
+            [false, "KQ", Keyword.delete(squares, :h1)]
+          move_to == "c1" ->
+            squares = Keyword.put(squares, :d1, squares[:a1])
+            [false, "KQ", Keyword.delete(squares, :a1)]
+          move_to == "g8" ->
+            squares = Keyword.put(squares, :f8, squares[:h8])
+            [false, "kq", Keyword.delete(squares, :h8)]
+          move_to == "c8" ->
+            squares = Keyword.put(squares, :d8, squares[:a8])
+            [false, "kq", Keyword.delete(squares, :a8)]
+          true ->
+            [false, nil, squares]
+        end
+      end
+
+      defp check_destination(squares, move_from, move_to, _figure_at_the_end, figure, _en_passant, _distance) do
+        squares = Keyword.delete(squares, :"#{move_from}")
+        [is_attack(squares[:"#{move_to}"]), nil, Keyword.put(squares, :"#{move_to}", figure)]
       end
 
       defp pion_beated_en_passant(color, move_to) do

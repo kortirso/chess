@@ -20,24 +20,24 @@ defmodule Chess.Move do
     try do
       current_position = Position.from_fen(current_fen)
 
-      [move_from, move_to] = parse_move(move)
+      [move_from, move_to] = parse_move(move, current_position.active)
 
       figure = find_figure(squares[:"#{move_from}"])
 
       check_active_player(figure, current_position.active)
 
-      [route, distance] = check_route_for_figure(figure, move_from, move_to)
+      [route, distance] = check_route_for_figure(figure, move_from, move_to, current_position.castling)
 
       if figure.type != "n" do
         check_barriers_on_route(squares, move_from, route, distance)
       end
 
-      {is_attack, squares} = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant)
+      [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant, distance)
 
       {:ok,
         %Game{
           squares: squares,
-          current_fen: Position.new(squares, current_position, figure, distance, move_to, is_attack) |> Position.to_fen,
+          current_fen: Position.new(squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen,
           history: Enum.concat(history, %{fen: current_fen, move: move})
         }
       }
@@ -46,10 +46,41 @@ defmodule Chess.Move do
     end
   end
 
-  defp parse_move(move) do
+  defp parse_move(move, active) when move == "0-0" or "0-0-0" do
+    [
+      define_kings_from(active),
+      define_kings_to(active, move)
+    ]
+  end
+
+  defp parse_move(move, _active) do
     move
     |> check_move_format()
     |> String.split("-")
+  end
+
+  defp define_kings_from(active) do
+    if active == "w" do
+      "e1"
+    else  
+      "e8"
+    end
+  end
+
+  defp define_kings_to(active, move) when active == "w" do
+    if move == "0-0" do
+      "g1"
+    else
+      "c1"
+    end
+  end
+
+  defp define_kings_to(active, move) when active == "b" do
+    if move == "0-0" do
+      "g8"
+    else
+      "c8"
+    end
   end
 
   defp find_figure(figure) when figure == nil do
@@ -66,7 +97,7 @@ defmodule Chess.Move do
     end
   end
 
-  defp check_route_for_figure(figure, move_from, move_to) do
+  defp check_route_for_figure(figure, move_from, move_to, castling) do
     route = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
     distance = calc_distance(route)
 
@@ -74,7 +105,7 @@ defmodule Chess.Move do
       raise "You need to move figure somewhere"
     end
 
-    check_figure_route(figure, route, String.split(move_from, "", trim: true))
+    check_figure_route(figure, route, String.split(move_from, "", trim: true), castling)
     [route, distance]
   end
 
