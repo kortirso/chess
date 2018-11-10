@@ -50,7 +50,7 @@ defmodule Chess.Move.Destination do
 
       defp check_destination(squares, move_from, move_to, _figure_at_the_end, figure, _en_passant, _distance) do
         squares = Keyword.delete(squares, :"#{move_from}")
-        [is_attack(squares[:"#{move_to}"]), nil, Keyword.put(squares, :"#{move_to}", figure)]
+        [is_attack(squares[:"#{move_to}"]), check_castling_figure(move_from), Keyword.put(squares, :"#{move_to}", figure)]
       end
 
       defp pion_beated_en_passant(color, move_to) do
@@ -69,6 +69,18 @@ defmodule Chess.Move.Destination do
 
       defp is_attack(_figure) do
         true
+      end
+
+      defp check_castling_figure(move_from) do
+        case move_from do
+          "a1" -> "Q"
+          "e1" -> ["K", "Q"]
+          "h1" -> "K"
+          "a8" -> "q"
+          "e8" -> ["k", "q"]
+          "h8" -> "k"
+          _ -> nil
+        end
       end
     end
   end

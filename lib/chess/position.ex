@@ -50,6 +50,11 @@ defmodule Chess.Position do
     castling
   end
 
+  defp check_castling(castling, [is_king, is_queen]) do
+    castling = check_castling(castling, is_king)
+    check_castling(castling, is_queen)
+  end
+
   defp check_castling(castling, is_castling) do
     castling = String.replace(castling, is_castling, "")
     if castling == "", do: "-", else: castling
