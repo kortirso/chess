@@ -343,6 +343,34 @@ defmodule Chess.MoveTest do
     end
   end
 
+  describe "for pre-castling moves, without barriers" do
+    setup _context do
+      squares = [{:a1, %Figure{color: "white", type: "r"}}, {:e1, %Figure{color: "white", type: "k"}}, {:h1, %Figure{color: "white", type: "r"}}, {:a8, %Figure{color: "black", type: "r"}}, {:e8, %Figure{color: "black", type: "k"}}, {:h8, %Figure{color: "black", type: "r"}}]
+      game = %Game{squares: squares}
+      {:ok, game: game}
+    end
+
+    test "white, short way", state do
+      assert {:ok, game} = Game.play(state[:game], "h1-h2")
+
+      assert game.current_fen == "r3k2r/8/8/8/8/8/7R/R3K3 b Qkq - 1 1"
+
+      assert {:ok, game} = Game.play(game, "h8-h7")
+
+      assert game.current_fen == "r3k3/7r/8/8/8/8/7R/R3K3 w Qq - 2 2"
+    end
+
+    test "white, long way", state do
+      assert {:ok, game} = Game.play(state[:game], "a1-a2")
+
+      assert game.current_fen == "r3k2r/8/8/8/8/8/R7/4K2R b Kkq - 1 1"
+
+      assert {:ok, game} = Game.play(game, "a8-a7")
+
+      assert game.current_fen == "4k2r/r7/8/8/8/8/R7/4K2R w Kk - 2 2"
+    end
+  end
+
   describe "for white castling moves, with barriers" do
     setup _context do
       squares = [{:a1, %Figure{color: "white", type: "r"}}, {:b1, %Figure{color: "white", type: "r"}}, {:e1, %Figure{color: "white", type: "k"}}, {:f1, %Figure{color: "white", type: "r"}}, {:h1, %Figure{color: "white", type: "r"}}]
