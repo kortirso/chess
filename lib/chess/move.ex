@@ -25,7 +25,7 @@ defmodule Chess.Move do
   Makes new move
   """
   def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) do
-    #try do
+    try do
       current_position = Position.from_fen(current_fen)
 
       [move_from, move_to] = parse_move(move, current_position.active)
@@ -53,14 +53,14 @@ defmodule Chess.Move do
         %Game{
           squares: squares,
           current_fen: Position.new(squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen,
-          history: Enum.concat(history, %{fen: current_fen, move: move}),
+          history: [%{fen: current_fen, move: move} | history],
           status: status,
           check: check
         }
       }
-    #rescue
-      #error -> {:error, error.message}
-    #end
+    rescue
+      error -> {:error, error.message}
+    end
   end
 
   defp parse_move(move, active) when move == "0-0" or move == "0-0-0" do
