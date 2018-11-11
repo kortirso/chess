@@ -5,19 +5,27 @@ defmodule Chess.Move do
 
   @x_fields ["a", "b", "c", "d", "e", "f", "g", "h"]
   @y_fields ["1", "2", "3", "4", "5", "6", "7", "8"]
+  @indexes [0, 1, 2, 3, 4, 5, 6, 7]
 
-  alias Chess.{Game, Move, Position}
+  @diagonals [[-1, -1], [-1, 1], [1, 1], [1, -1]]
+  @linears [[-1, 0], [0, 1], [1, 0], [0, -1]]
+  @knights [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2]]
+  @white_pions [[1, 1], [-1, 1]]
+  @black_pions [[1, -1], [-1, -1]]
+
+  alias Chess.{Game, Move, Position, Figure}
 
   use Move.Parse
   use Move.FigureRoute
   use Move.Barriers
   use Move.Destination
+  use Move.EndMove
 
   @doc """
   Makes new move
   """
-  def new(%Game{squares: squares, current_fen: current_fen, history: history}, move) do
-    try do
+  def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) do
+    #try do
       current_position = Position.from_fen(current_fen)
 
       [move_from, move_to] = parse_move(move, current_position.active)
@@ -39,16 +47,20 @@ defmodule Chess.Move do
 
       [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant, distance)
 
+      [status, check] = end_move(squares, current_position.active, status)
+
       {:ok,
         %Game{
           squares: squares,
           current_fen: Position.new(squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen,
-          history: Enum.concat(history, %{fen: current_fen, move: move})
+          history: Enum.concat(history, %{fen: current_fen, move: move}),
+          status: status,
+          check: check
         }
       }
-    rescue
-      error -> {:error, error.message}
-    end
+    #rescue
+      #error -> {:error, error.message}
+    #end
   end
 
   defp parse_move(move, active) when move == "0-0" or move == "0-0-0" do

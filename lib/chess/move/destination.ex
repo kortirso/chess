@@ -2,10 +2,11 @@ defmodule Chess.Move.Destination do
   @moduledoc """
   Module for checking destination point for figure
   """
+
+  alias Chess.{Figure}
+
   defmacro __using__(_opts) do
     quote do
-      alias Chess.{Figure}
-
       defp check_destination(_squares, move_from, move_to, %Figure{color: end_color}, %Figure{color: color}, _en_passant, _distance) when end_color == color do
         raise "Square #{move_to} is under control of your figure"
       end

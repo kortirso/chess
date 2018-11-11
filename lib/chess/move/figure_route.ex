@@ -3,10 +3,10 @@ defmodule Chess.Move.FigureRoute do
   Module for checking figures routes
   """
 
+  alias Chess.{Figure}
+
   defmacro __using__(_opts) do
     quote do
-      alias Chess.{Figure}
-
       defp check_figure_route(%Figure{color: color, type: type}, route, [_move_from_x, move_from_y], _castling) when type == "p" do
         unless pion_move(route, move_from_y, color) do
           raise "Pion can not move like this"
