@@ -106,7 +106,7 @@ defmodule Chess.Move.EndMove do
         y_square_index = y_index + y_route * current_step
         if x_square_index in @indexes && y_square_index in @indexes do
           square = :"#{Enum.at(@x_fields, x_square_index)}#{Enum.at(@y_fields, y_square_index)}"
-          acc = Enum.concat(acc, [square])
+          acc = [square | acc]
           if Keyword.has_key?(squares, square) do
             check_attacked_square(squares, [x_index, y_index], [x_route, y_route], limit + 1, limit, acc)
           else
