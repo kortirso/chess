@@ -16,15 +16,18 @@ defmodule Chess.Move.Destination do
         cond do
           x_route == 0 && figure_at_the_end != nil ->
             raise "There are barrier for pion at the and of move"
+
           x_route != 0 && figure_at_the_end == nil && move_to == en_passant ->
             beated_pion = pion_beated_en_passant(color, move_to)
             squares = Keyword.delete(squares, :"#{beated_pion}")
-            [true, nil, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})]
+            [true, false, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})]
+
           x_route != 0 && figure_at_the_end == nil ->
             raise "Pion must attack for diagonal move"
+
           true ->
             squares = Keyword.delete(squares, :"#{move_from}")
-            [is_attack(squares[:"#{move_to}"]), nil, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})]
+            [is_attack(squares[:"#{move_to}"]), false, Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})]
         end
       end
 
@@ -64,13 +67,8 @@ defmodule Chess.Move.Destination do
         end
       end
 
-      defp is_attack(figure) when figure == nil do
-        false
-      end
-
-      defp is_attack(_figure) do
-        true
-      end
+      defp is_attack(nil), do: false
+      defp is_attack(_), do: true
 
       defp check_castling_figure(move_from) do
         case move_from do
@@ -80,7 +78,7 @@ defmodule Chess.Move.Destination do
           "a8" -> "q"
           "e8" -> ["k", "q"]
           "h8" -> "k"
-          _ -> nil
+          _ -> false
         end
       end
     end

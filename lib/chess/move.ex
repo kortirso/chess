@@ -26,7 +26,7 @@ defmodule Chess.Move do
   """
   def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) do
     try do
-      current_position = Position.from_fen(current_fen)
+      current_position = Position.new(current_fen)
 
       [move_from, move_to] = parse_move(move, current_position.active)
 
