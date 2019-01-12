@@ -6,7 +6,7 @@ defmodule Chess.Square do
   alias Chess.{Figure}
 
   @doc """
-  Creates 32 figures for new game and puts them to spesific squares
+  Creates 32 figures for new game and puts them to specific squares
   Returns keyword list like
   [
     a1: %Chess.Figure{color: "white", type: "r"},
