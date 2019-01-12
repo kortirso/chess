@@ -8,7 +8,7 @@ defmodule Chess.MixProject do
   def project do
     [
       app: :chess,
-      version: "0.0.1",
+      version: "0.1.0",
       elixir: "~> 1.7",
       name: "Chess",
       description: @description,
