@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - squares creation process for new game
 - figure creation process
 - Position module
+- Move module
 
 ## [0.1.0] - 2019-01-12
 ### Added

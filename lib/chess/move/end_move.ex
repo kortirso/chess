@@ -3,7 +3,7 @@ defmodule Chess.Move.EndMove do
   Module for checking attacked squares
   """  
 
-  alias Chess.{Figure}
+  alias Chess.Figure
 
   defmacro __using__(_opts) do
     quote do
@@ -68,6 +68,7 @@ defmodule Chess.Move.EndMove do
         square = Atom.to_string(square)
         x_square_index = String.first(square)
         y_square_index = String.last(square)
+
         [
           Enum.find_index(@x_fields, fn x -> x == x_square_index end),
           Enum.find_index(@y_fields, fn x -> x == y_square_index end)
@@ -117,9 +118,7 @@ defmodule Chess.Move.EndMove do
         end
       end
 
-      defp check_attacked_square(_squares, _square, _route, current_step, limit, acc) when current_step > limit do
-        acc
-      end
+      defp check_attacked_square(_, _, _, current_step, limit, acc) when current_step > limit, do: acc
     end
   end
 end

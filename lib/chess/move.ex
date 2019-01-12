@@ -5,6 +5,7 @@ defmodule Chess.Move do
 
   @x_fields ["a", "b", "c", "d", "e", "f", "g", "h"]
   @y_fields ["1", "2", "3", "4", "5", "6", "7", "8"]
+
   @indexes [0, 1, 2, 3, 4, 5, 6, 7]
 
   @diagonals [[-1, -1], [-1, 1], [1, 1], [1, -1]]
@@ -14,39 +15,27 @@ defmodule Chess.Move do
   @black_pions [[1, -1], [-1, -1]]
 
   alias Chess.{Game, Move, Position, Figure}
-
-  use Move.Parse
-  use Move.FigureRoute
-  use Move.Barriers
-  use Move.Destination
-  use Move.EndMove
+  use Move.{Parse, FigureRoute, Barriers, Destination, EndMove}
 
   @doc """
   Makes new move
   """
-  def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) do
+
+  def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) when is_binary(move) do
     try do
       current_position = Position.new(current_fen)
-
-      [move_from, move_to] = parse_move(move, current_position.active)
-
+      [move_from, move_to] = do_parse_move(move, current_position.active)
       figure = find_figure(squares[:"#{move_from}"])
-
       check_active_player(figure, current_position.active)
-
       [route, distance] = check_route_for_figure(figure, move_from, move_to, current_position.castling)
 
-      if figure.type != "n" do
-        check_barriers_on_route(squares, move_from, route, distance)
-      end
-
+      if figure.type != "n", do: check_barriers_on_route(squares, move_from, route, distance)
       if figure.type == "k" && distance == 2 do
         [rook_from, rook_route, rook_distance] = define_rook_move_for_castling(move_to)
         check_barriers_on_route(squares, rook_from, rook_route, rook_distance)
       end
 
       [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant, distance)
-
       [status, check] = end_move(squares, current_position.active, status)
 
       {:ok,
@@ -63,67 +52,23 @@ defmodule Chess.Move do
     end
   end
 
-  defp parse_move(move, active) when move == "0-0" or move == "0-0-0" do
-    [
-      define_kings_from(active),
-      define_kings_to(active, move)
-    ]
-  end
-
-  defp parse_move(move, _active) do
-    move
-    |> check_move_format()
-    |> String.split("-")
-  end
-
-  defp define_kings_from(active) do
-    if active == "w" do
-      "e1"
-    else  
-      "e8"
-    end
-  end
-
-  defp define_kings_to(active, move) when active == "w" do
-    if move == "0-0" do
-      "g1"
-    else
-      "c1"
-    end
-  end
-
-  defp define_kings_to(active, move) when active == "b" do
-    if move == "0-0" do
-      "g8"
-    else
-      "c8"
-    end
-  end
-
-  defp find_figure(figure) when figure == nil do
-    raise "Square does not have figure for move"
-  end
-
-  defp find_figure(figure) do
-    figure
-  end
+  defp find_figure(nil), do: raise "Square does not have figure for move"
+  defp find_figure(figure), do: figure
 
   defp check_active_player(%Figure{color: color}, active) do
-    if String.first(color) != active  do
-      raise "This is not move of #{color} player"
-    end
+    if String.first(color) != active, do: raise "This is not move of #{color} player"
   end
 
   defp check_route_for_figure(figure, move_from, move_to, castling) do
     route = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
     distance = calc_distance(route)
-
-    if distance == 0 do
-      raise "You need to move figure somewhere"
-    end
-
+    if distance == 0, do: raise "You need to move figure somewhere"
     check_figure_route(figure, route, String.split(move_from, "", trim: true), castling)
-    [route, distance]
+
+    [
+      route,
+      distance
+    ]
   end
 
   defp calc_route([move_from_x, move_from_y], [move_to_x, move_to_y]) do
@@ -136,21 +81,16 @@ defmodule Chess.Move do
   defp calc_distance(route) do
     route
     |> Enum.map(fn x -> abs(x) end)
-    |> Enum.max
+    |> Enum.max()
   end
 
   defp define_rook_move_for_castling(move_to) do
     cond do
-      move_to == "g1" ->
-        ["h1", [-2, 0], 2]
-      move_to == "c1" ->
-        ["a1", [3, 0], 3]
-      move_to == "g8" ->
-        ["h8", [-2, 0], 2]
-      move_to == "c8" ->
-        ["a8", [3, 0], 3]
-      true ->
-        ["", [0, 0], 0]
+      move_to == "g1" -> ["h1", [-2, 0], 2]
+      move_to == "c1" -> ["a1", [3, 0], 3]
+      move_to == "g8" -> ["h8", [-2, 0], 2]
+      move_to == "c8" -> ["a8", [3, 0], 3]
+      true -> ["", [0, 0], 0]
     end
   end
 end

@@ -2,36 +2,62 @@ defmodule Chess.Move.Parse do
   @moduledoc """
   Module for parsing moves
   """
+
   defmacro __using__(_opts) do
     quote do
+      defp do_parse_move(move, active) when move == "0-0" or move == "0-0-0" do
+        [
+          define_kings_from(active),
+          define_kings_to(active, move)
+        ]
+      end
+
+      defp do_parse_move(move, _) do
+        move
+        |> check_move_format()
+        |> String.split("-")
+      end
+
+      defp define_kings_from("w"), do: "e1"
+      defp define_kings_from(_), do: "e8"
+
+      defp define_kings_to("w", move) do
+        if move == "0-0", do: "g1", else: "c1"
+      end
+
+      defp define_kings_to(_, move) do
+        if move == "0-0", do: "g8", else: "c8"
+      end
+
       defp check_move_format(move) do
         move
-        |> check_move_as_string
-        |> check_move_squares
+        |> check_move_as_string()
+        |> check_move_squares()
       end
 
       defp check_move_as_string(move) do
         cond do
-          !is_binary(move) ->
-            raise "Invalid move format"
-          String.length(move) != 5 ->
-            raise "Invalid move format"
-          true ->
-            move
+          String.length(move) != 5 -> raise "Invalid move format"
+          true -> move
         end
       end
 
       defp check_move_squares(move) do
         splitted_move = String.split(move, "", trim: true)
+
         cond do
           Enum.find(@x_fields, fn x -> x == Enum.at(splitted_move, 0) end) == nil ->
             raise "There is no such square on the board"
+
           Enum.find(@y_fields, fn x -> x == Enum.at(splitted_move, 1) end) == nil ->
             raise "There is no such square on the board"
+
           Enum.find(@x_fields, fn x -> x == Enum.at(splitted_move, 3) end) == nil ->
             raise "There is no such square on the board"
+
           Enum.find(@y_fields, fn x -> x == Enum.at(splitted_move, 4) end) == nil ->
             raise "There is no such square on the board"
+
           true ->
             move
         end
