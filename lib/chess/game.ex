@@ -5,25 +5,35 @@ defmodule Chess.Game do
 
   alias Chess.{Game, Square, Move, Position}
 
-  defstruct squares: nil, current_fen: Position.new |> Position.to_fen, history: [], status: :playing, check: nil
+  defstruct squares: nil, current_fen: Position.new |> Position.to_fen(), history: [], status: :playing, check: nil
 
   @doc """
   Creates a game
+
+  ## Examples
+
+      iex> Chess.Game.new()
+      %Chess.Game{squares: [...]}
+
   """
-  def new() do
-    Square.prepare_for_new_game()
-    |> Game.new
+  def new do
+    Square.prepare_for_new_game() |> do_new()
   end
 
-  def new(squares) do
-    %Game{squares: squares}
-  end
+  defp do_new(squares), do: %Game{squares: squares}
 
   @doc """
   Makes a play
-  Move represents like e2-e4
+
+  ## Parameters
+
+    - game: game object
+    - move: move represents like e2-e4
+
+  ## Examples
+
+      iex> Chess.Game.play(%Game{}, "e2-e4")
+
   """
-  def play(game, move) do
-    Move.new(game, move)
-  end
+  def play(%Game{} = game, move) when is_binary(move), do: Move.new(game, move)
 end
