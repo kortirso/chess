@@ -168,5 +168,11 @@ defmodule Chess.MoveTest do
 
       assert message == "There is barrier at square d2"
     end
+
+    test "return error, example 5", state do
+      {:error, message} = Game.play(state[:game], "0-0-0")
+
+      assert message == "There is barrier at square d1"
+    end
   end
 end

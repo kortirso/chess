@@ -107,23 +107,38 @@ defmodule Chess.Move do
     when type == "n" or distance == 1,
     do: 1
 
-  defp check_barriers_on_route(game, current_position, [move_from, _] = parsed_move, figure, route_and_distance) do
-    case do_check_barriers_on_route(game.squares, move_from, route_and_distance) do
+  defp check_barriers_on_route(game, current_position, [move_from, move_to] = parsed_move, figure, route_and_distance) do
+    result = do_check_barriers_on_route(game.squares, move_from, route_and_distance)
+
+    cond do
+      # check rook for castling
+      result == {:ok} && figure.type == "k" ->
+        [rook_from, rook_route_and_distance] = define_rook_move_for_castling(move_to)
+        do_check_barriers_on_route(game.squares, rook_from, rook_route_and_distance)
+
       # continue
-      {:ok} -> 1
+      result == {:ok} ->
+        1
+
       # render error message
-      result -> result
+      result ->
+        result
+    end
+  end
+
+  defp define_rook_move_for_castling(move_to) do
+    cond do
+      move_to == "g1" -> ["h1", [[-2, 0], 2]]
+      move_to == "c1" -> ["a1", [[3, 0], 3]]
+      move_to == "g8" -> ["h8", [[-2, 0], 2]]
+      move_to == "c8" -> ["a8", [[3, 0], 3]]
+      true -> ["", [[0, 0], 0]]
     end
   end
 
   @doc """
   def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) when is_binary(move) do
     try do
-      if figure.type == "k" && distance == 2 do
-        [rook_from, rook_route, rook_distance] = define_rook_move_for_castling(move_to)
-        check_barriers_on_route(squares, rook_from, rook_route, rook_distance)
-      end
-
       [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#move_to}"], figure, current_position.en_passant, distance)
       [status, check] = end_move(squares, current_position.active, status)
 
@@ -141,14 +156,4 @@ defmodule Chess.Move do
     end
   end
   """
-
-  defp define_rook_move_for_castling(move_to) do
-    cond do
-      move_to == "g1" -> ["h1", [-2, 0], 2]
-      move_to == "c1" -> ["a1", [3, 0], 3]
-      move_to == "g8" -> ["h8", [-2, 0], 2]
-      move_to == "c8" -> ["a8", [3, 0], 3]
-      true -> ["", [0, 0], 0]
-    end
-  end
 end
