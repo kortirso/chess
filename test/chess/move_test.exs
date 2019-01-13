@@ -143,4 +143,30 @@ defmodule Chess.MoveTest do
       assert message == "King can not move like this"
     end
   end
+
+  describe "for invalid figure routes with barriers" do
+    test "return error, example 1", state do
+      {:error, message} = Game.play(state[:game], "a1-a3")
+
+      assert message == "There is barrier at square a2"
+    end
+
+    test "return error, example 2", state do
+      {:error, message} = Game.play(state[:game], "a1-c1")
+
+      assert message == "There is barrier at square b1"
+    end
+
+    test "return error, example 3", state do
+      {:error, message} = Game.play(state[:game], "c1-a3")
+
+      assert message == "There is barrier at square b2"
+    end
+
+    test "return error, example 4", state do
+      {:error, message} = Game.play(state[:game], "d1-d8")
+
+      assert message == "There is barrier at square d2"
+    end
+  end
 end

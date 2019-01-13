@@ -97,14 +97,28 @@ defmodule Chess.Move do
       # render error message
       {:error, message} -> {:error, message}
       # continue
-      _ -> 1
+      _ -> check_barriers_on_route(game, current_position, parsed_move, figure, route_and_distance)
+    end
+  end
+
+  # check barriers on the figure's route
+  # except knight's move and moves to distance in 1 square
+  defp check_barriers_on_route(game, current_position, parsed_move, %Figure{type: type} = figure, [_, distance] = route_and_distance)
+    when type == "k" or distance == 1,
+    do: 1
+
+  defp check_barriers_on_route(game, current_position, [move_from, _] = parsed_move, figure, route_and_distance) do
+    case do_check_barriers_on_route(game.squares, move_from, route_and_distance) do
+      # continue
+      {:ok} -> 1
+      # render error message
+      result -> result
     end
   end
 
   @doc """
   def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) when is_binary(move) do
     try do
-      if figure.type != "n", do: check_barriers_on_route(squares, move_from, route, distance)
       if figure.type == "k" && distance == 2 do
         [rook_from, rook_route, rook_distance] = define_rook_move_for_castling(move_to)
         check_barriers_on_route(squares, rook_from, rook_route, rook_distance)

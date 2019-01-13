@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - parsing move process
 - checking valid figure for move
 - checking routes for figures
+- checking barriers for moves
 
 ## [0.1.1] - 2019-01-12
 ### Modified
