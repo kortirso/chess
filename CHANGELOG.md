@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - checking routes for figures
 - checking barriers for moves
 - checking barriers for castling moves
+- checking destination point
 
 ## [0.1.1] - 2019-01-12
 ### Modified

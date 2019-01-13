@@ -175,4 +175,12 @@ defmodule Chess.MoveTest do
       assert message == "There is barrier at square d1"
     end
   end
+
+  describe "for invalid destination square" do
+    test "return error", state do
+      {:error, message} = Game.play(state[:game], "a1-a2")
+
+      assert message == "Square a2 is under control of your figure"
+    end
+  end
 end

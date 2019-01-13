@@ -42,7 +42,7 @@ defmodule Chess.Move do
   end
 
   # checking source square for existed figure for move
-  defp find_figure(game, current_position, [move_from, move_to] = parsed_move) do
+  defp find_figure(game, current_position, [move_from, _] = parsed_move) do
     case do_find_figure(game.squares[:"#{move_from}"], current_position.active) do
       # render error message
       {:error, message} -> {:error, message}
@@ -105,7 +105,7 @@ defmodule Chess.Move do
   # except knight's move and moves to distance in 1 square
   defp check_barriers_on_route(game, current_position, parsed_move, %Figure{type: type} = figure, [_, distance] = route_and_distance)
     when type == "n" or distance == 1,
-    do: 1
+    do: check_destination(game, current_position, parsed_move, figure, route_and_distance)
 
   defp check_barriers_on_route(game, current_position, [move_from, move_to] = parsed_move, figure, route_and_distance) do
     result = do_check_barriers_on_route(game.squares, move_from, route_and_distance)
@@ -114,46 +114,48 @@ defmodule Chess.Move do
       # check rook for castling
       result == {:ok} && figure.type == "k" ->
         [rook_from, rook_route_and_distance] = define_rook_move_for_castling(move_to)
-        do_check_barriers_on_route(game.squares, rook_from, rook_route_and_distance)
+        check_barriers_on_route(game, current_position, [rook_from, nil], game.squares[:"#{rook_from}"],rook_route_and_distance)
 
       # continue
       result == {:ok} ->
-        1
+        check_destination(game, current_position, parsed_move, figure, route_and_distance)
 
       # render error message
-      result ->
+      true ->
         result
     end
   end
 
-  defp define_rook_move_for_castling(move_to) do
-    cond do
-      move_to == "g1" -> ["h1", [[-2, 0], 2]]
-      move_to == "c1" -> ["a1", [[3, 0], 3]]
-      move_to == "g8" -> ["h8", [[-2, 0], 2]]
-      move_to == "c8" -> ["a8", [[3, 0], 3]]
-      true -> ["", [[0, 0], 0]]
+  defp define_rook_move_for_castling("g1"), do: ["h1", [[-2, 0], 2]]
+  defp define_rook_move_for_castling("c1"), do: ["a1", [[3, 0], 3]]
+  defp define_rook_move_for_castling("g8"), do: ["h8", [[-2, 0], 2]]
+  defp define_rook_move_for_castling("c8"), do: ["a8", [[3, 0], 3]]
+  defp define_rook_move_for_castling(_), do: ["", [[0, 0], 0]]
+
+  # check destanation point
+  defp check_destination(game, current_position, [_, move_to] = parsed_move, figure, [_, distance] = route_and_distance) do
+    result = do_check_destination(game.squares, parsed_move, game.squares[:"#{move_to}"], figure, current_position.en_passant, distance)
+    # result
+    # [is_attack, is_castling, new_squares]
+
+    case result do
+      # render error message
+      {:error, message} -> {:error, message}
+      # continue
+      _ -> complete_move(game, current_position, parsed_move, figure, route_and_distance, result)
     end
   end
 
-  @doc """
-  def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) when is_binary(move) do
-    try do
-      [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#move_to}"], figure, current_position.en_passant, distance)
-      [status, check] = end_move(squares, current_position.active, status)
-
-      {:ok,
-        %Game{
-          squares: squares,
-          current_fen: Position.new(squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen,
-          history: [%{fen: current_fen, move: move} | history],
-          status: status,
-          check: check
-        }
+  # complete move
+  defp complete_move(game, current_position, [move_from, move_to], figure, [_, distance], [is_attack, is_castling, new_squares]) do
+    {:ok,
+      %Game{
+        squares: new_squares,
+        current_fen: Position.new(new_squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen(),
+        history: [%{fen: game.current_fen, move: "#{move_from}-#{move_to}"} | game.history],
+        status: :playing,
+        check: nil
       }
-    rescue
-      error -> {:error, error.message}
-    end
+    }
   end
-  """
 end

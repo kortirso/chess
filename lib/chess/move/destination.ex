@@ -7,16 +7,18 @@ defmodule Chess.Move.Destination do
 
   defmacro __using__(_opts) do
     quote do
-      defp check_destination(_, move_from, move_to, %Figure{color: end_color}, %Figure{color: color}, _, _) when end_color == color do
-        raise "Square #{move_to} is under control of your figure"
-      end
+      # if destination square has own figure
+      defp do_check_destination(_, [_, move_to], %Figure{color: end_color}, %Figure{color: color}, _, _)
+        when end_color == color,
+        do: {:error, "Square #{move_to} is under control of your figure"}
 
-      defp check_destination(squares, move_from, move_to, figure_at_the_end, %Figure{color: color, type: type}, en_passant, _) when type == "p" do
-        [x_route, _y_route] = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
+      # different rules for pions
+      defp do_check_destination(squares, [move_from, move_to], figure_at_the_end, %Figure{color: color, type: "p"} = figure, en_passant, _) do
+        [x_route, _] = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
 
         cond do
           x_route == 0 && figure_at_the_end != nil ->
-            raise "There are barrier for pion at the and of move"
+            {:error, "There are barrier for pion at the and of move"}
 
           x_route != 0 && figure_at_the_end == nil && move_to == en_passant ->
             beated_pion = pion_beated_en_passant(color, move_to)
@@ -24,25 +26,26 @@ defmodule Chess.Move.Destination do
             [
               true,
               false,
-              Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
+              Keyword.put(squares, :"#{move_to}", figure)
             ]
 
           x_route != 0 && figure_at_the_end == nil ->
-            raise "Pion must attack for diagonal move"
+            {:error, "Pion must attack for diagonal move"}
 
           true ->
             squares = Keyword.delete(squares, :"#{move_from}")
             [
               is_attack(squares[:"#{move_to}"]),
               false,
-              Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
+              Keyword.put(squares, :"#{move_to}", figure)
             ]
         end
       end
 
-      defp check_destination(squares, move_from, move_to, _, %Figure{color: color, type: type}, _, distance) when type == "k" and distance == 2 do
+      # different rules for castling
+      defp do_check_destination(squares, [move_from, move_to], _, %Figure{color: color, type: "k"} = figure, _, 2) do
         squares = Keyword.delete(squares, :"#{move_from}")
-        squares = Keyword.put(squares, :"#{move_to}", %Figure{color: color, type: type})
+        squares = Keyword.put(squares, :"#{move_to}", figure)
 
         cond do
           move_to == "g1" ->
@@ -62,11 +65,12 @@ defmodule Chess.Move.Destination do
             [false, "kq", Keyword.delete(squares, :a8)]
 
           true ->
-            [false, nil, squares]
+            [false, false, squares]
         end
       end
 
-      defp check_destination(squares, move_from, move_to, _, figure, _, _) do
+      # other rules
+      defp do_check_destination(squares, [move_from, move_to], _, figure, _, _) do
         squares = Keyword.delete(squares, :"#{move_from}")
 
         [
@@ -79,11 +83,8 @@ defmodule Chess.Move.Destination do
       defp pion_beated_en_passant(color, move_to) do
         y_point = String.last(move_to)
         y_point = Enum.find_index(@y_fields, fn y -> y == y_point end)
-        if color == "white" do
-          String.first(move_to) <> Enum.at(@y_fields, y_point - 1)
-        else
-          String.first(move_to) <> Enum.at(@y_fields, y_point + 1)
-        end
+        coefficient = if color == "white", do: -1, else: 1
+        String.first(move_to) <> Enum.at(@y_fields, y_point + coefficient)
       end
 
       defp is_attack(nil), do: false
