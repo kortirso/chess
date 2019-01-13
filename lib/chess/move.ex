@@ -104,7 +104,7 @@ defmodule Chess.Move do
   # check barriers on the figure's route
   # except knight's move and moves to distance in 1 square
   defp check_barriers_on_route(game, current_position, parsed_move, %Figure{type: type} = figure, [_, distance] = route_and_distance)
-    when type == "k" or distance == 1,
+    when type == "n" or distance == 1,
     do: 1
 
   defp check_barriers_on_route(game, current_position, [move_from, _] = parsed_move, figure, route_and_distance) do
