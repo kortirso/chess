@@ -42,12 +42,12 @@ defmodule Chess.Move do
   end
 
   # checking source square for existed figure for move
-  defp find_figure(game, current_position, [move_from, move_to]) do
+  defp find_figure(game, current_position, [move_from, move_to] = parsed_move) do
     case do_find_figure(game.squares[:"#{move_from}"], current_position.active) do
       # render error message
       {:error, message} -> {:error, message}
       # continue
-      figure -> 1
+      figure -> check_route_for_figure(game, current_position, parsed_move, figure)
     end
   end
 
@@ -57,15 +57,53 @@ defmodule Chess.Move do
     if String.first(color) != active_player, do: {:error, "This is not move of #{color} player"}, else: figure
   end
 
+  # calculates route and distance for figure's move
+  defp check_route_for_figure(game, current_position, parsed_move, figure) do
+    case calc_route_and_distance(parsed_move) do
+      # render error message
+      {:error, message} -> {:error, message}
+      # continue
+      route_and_distance -> do_check_route_for_figure(game, current_position, parsed_move, figure, route_and_distance)
+    end
+  end
+
+  defp calc_route_and_distance([move_from, move_to]) do
+    # calculate route direction
+    route = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
+    # calculate distance of move
+    distance = calc_distance(route)
+
+    case distance do
+      0 -> {:error, "You need to move figure somewhere"}
+      _ -> [route, distance]
+    end
+  end
+
+  defp calc_route([move_from_x, move_from_y], [move_to_x, move_to_y]) do
+    [
+      Enum.find_index(@x_fields, fn x -> x == move_to_x end) - Enum.find_index(@x_fields, fn x -> x == move_from_x end),
+      Enum.find_index(@y_fields, fn y -> y == move_to_y end) - Enum.find_index(@y_fields, fn y -> y == move_from_y end)
+    ]
+  end
+
+  defp calc_distance(route) do
+    route
+    |> Enum.map(fn x -> abs(x) end)
+    |> Enum.max()
+  end
+
+  defp do_check_route_for_figure(game, current_position, [move_from, _] = parsed_move, figure, [route, _] = route_and_distance) do
+    case check_figure_route(figure, route, String.split(move_from, "", trim: true), current_position.castling) do
+      # render error message
+      {:error, message} -> {:error, message}
+      # continue
+      _ -> 1
+    end
+  end
+
   @doc """
   def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) when is_binary(move) do
     try do
-      current_position = Position.new(current_fen)
-      [move_from, move_to] = do_parse_move(move, current_position.active)
-      figure = find_figure(squares[:"#move_from}"])
-      check_active_player(figure, current_position.active)
-      [route, distance] = check_route_for_figure(figure, move_from, move_to, current_position.castling)
-
       if figure.type != "n", do: check_barriers_on_route(squares, move_from, route, distance)
       if figure.type == "k" && distance == 2 do
         [rook_from, rook_route, rook_distance] = define_rook_move_for_castling(move_to)
@@ -89,31 +127,6 @@ defmodule Chess.Move do
     end
   end
   """
-
-  defp check_route_for_figure(figure, move_from, move_to, castling) do
-    route = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
-    distance = calc_distance(route)
-    if distance == 0, do: raise "You need to move figure somewhere"
-    check_figure_route(figure, route, String.split(move_from, "", trim: true), castling)
-
-    [
-      route,
-      distance
-    ]
-  end
-
-  defp calc_route([move_from_x, move_from_y], [move_to_x, move_to_y]) do
-    [
-      Enum.find_index(@x_fields, fn x -> x == move_to_x end) - Enum.find_index(@x_fields, fn x -> x == move_from_x end),
-      Enum.find_index(@y_fields, fn y -> y == move_to_y end) - Enum.find_index(@y_fields, fn y -> y == move_from_y end)
-    ]
-  end
-
-  defp calc_distance(route) do
-    route
-    |> Enum.map(fn x -> abs(x) end)
-    |> Enum.max()
-  end
 
   defp define_rook_move_for_castling(move_to) do
     cond do

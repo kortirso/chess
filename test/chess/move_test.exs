@@ -41,4 +41,106 @@ defmodule Chess.MoveTest do
       assert message == "This is not move of black player"
     end
   end
+
+  describe "for invalid figure routes, pion" do
+    test "return error for move like knight", state do
+      {:error, message} = Game.play(state[:game], "a2-b4")
+
+      assert message == "Pion can not move like this"
+    end
+
+    test "return error for long diagonal move", state do
+      {:error, message} = Game.play(state[:game], "a2-c4")
+
+      assert message == "Pion can not move like this"
+    end
+
+    test "return error for long linear move", state do
+      {:error, message} = Game.play(state[:game], "a2-a5")
+
+      assert message == "Pion can not move like this"
+    end
+
+    test "return error for strafe move", state do
+      {:error, message} = Game.play(state[:game], "a2-b2")
+
+      assert message == "Pion can not move like this"
+    end
+
+    test "return error for back move", state do
+      {:error, message} = Game.play(state[:game], "a2-a1")
+
+      assert message == "Pion can not move like this"
+    end
+  end
+
+  describe "for invalid figure routes, rook" do
+    test "return error for move like knight", state do
+      {:error, message} = Game.play(state[:game], "a1-b3")
+
+      assert message == "Rook can not move like this"
+    end
+
+    test "return error for diagonal move", state do
+      {:error, message} = Game.play(state[:game], "a1-b2")
+
+      assert message == "Rook can not move like this"
+    end
+  end
+
+  describe "for invalid figure routes, knight" do
+    test "return error for diagonal move", state do
+      {:error, message} = Game.play(state[:game], "b1-a2")
+
+      assert message == "Knight can not move like this"
+    end
+
+    test "return error for linear move", state do
+      {:error, message} = Game.play(state[:game], "b1-b2")
+
+      assert message == "Knight can not move like this"
+    end
+  end
+
+  describe "for invalid figure routes, bishop" do
+    test "return error for move like knight", state do
+      {:error, message} = Game.play(state[:game], "c1-e2")
+
+      assert message == "Bishop can not move like this"
+    end
+
+    test "return error for linear move", state do
+      {:error, message} = Game.play(state[:game], "c1-c2")
+
+      assert message == "Bishop can not move like this"
+    end
+  end
+
+  describe "for invalid figure routes, queen" do
+    test "return error for move like knight", state do
+      {:error, message} = Game.play(state[:game], "d1-e3")
+
+      assert message == "Queen can not move like this"
+    end
+  end
+
+  describe "for invalid figure routes, king" do
+    test "return error for move like knight", state do
+      {:error, message} = Game.play(state[:game], "e1-d3")
+
+      assert message == "King can not move like this"
+    end
+
+    test "return error for long diagonal move", state do
+      {:error, message} = Game.play(state[:game], "e1-g3")
+
+      assert message == "King can not move like this"
+    end
+
+    test "return error for long linear move", state do
+      {:error, message} = Game.play(state[:game], "e1-e3")
+
+      assert message == "King can not move like this"
+    end
+  end
 end
