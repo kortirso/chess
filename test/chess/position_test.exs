@@ -25,6 +25,12 @@ defmodule Chess.PositionTest do
     assert full_move == 1
   end
 
+  test "create position from FEN-notation, invalid FEN" do
+    {:error, message} = Position.new("r")
+
+    assert message == "Position must contain 8 blocks for each line"
+  end
+
   test "create FEN-notation from position" do
     fen = Position.new() |> Position.to_fen()
 

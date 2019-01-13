@@ -21,10 +21,9 @@ defmodule Chess.Game do
 
   """
   def new do
-    Square.prepare_for_new_game() |> do_new()
+    squares = Square.prepare_for_new_game()
+    %Game{squares: squares}
   end
-
-  defp do_new(squares), do: %Game{squares: squares}
 
   @doc """
   Makes a play

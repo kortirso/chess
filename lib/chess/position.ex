@@ -3,8 +3,8 @@ defmodule Chess.Position do
   Position module
   """
 
-  @x_lines [8, 7, 6, 5, 4, 3, 2, 1]
-  @y_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
+  @x_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
+  @y_lines [8, 7, 6, 5, 4, 3, 2, 1]
 
   alias Chess.{Figure, Position}
 
@@ -34,18 +34,27 @@ defmodule Chess.Position do
       iex> Chess.Position.new("FEN")
       %Chess.Position{}
 
+      iex> Chess.Position.new("r")
+      {:error, "Position must contain 8 blocks for each line"}
+
   """
   def new(current_fen) when is_binary(current_fen) do
-    fen = parse_fen(current_fen)
-    
-    %Position{
-      position: Enum.at(fen, 0),
-      active: Enum.at(fen, 1),
-      castling: Enum.at(fen, 2),
-      en_passant: Enum.at(fen, 3),
-      half_move: parse(Integer.parse(Enum.at(fen, 4))),
-      full_move: parse(Integer.parse(Enum.at(fen, 5)))
-    }
+    case parse_fen(current_fen) do
+      # create position
+      {:ok, fen} ->
+        %Position{
+          position: Enum.at(fen, 0),
+          active: Enum.at(fen, 1),
+          castling: Enum.at(fen, 2),
+          en_passant: Enum.at(fen, 3),
+          half_move: fen |> Enum.at(4) |> Integer.parse() |> parse(),
+          full_move: fen |> Enum.at(5) |> Integer.parse() |> parse()
+        }
+
+      # return error
+      result ->
+        result
+    end
   end
 
   defp parse_fen(fen) do
@@ -53,13 +62,13 @@ defmodule Chess.Position do
 
     cond do
       length(String.split(Enum.at(splitted_fen, 0), "/", trim: true)) != 8 ->
-        raise "Position must contain 8 blocks for each line"
+        {:error, "Position must contain 8 blocks for each line"}
 
       Enum.find(["w", "b"], fn x -> x == Enum.at(splitted_fen, 1) end) == nil ->
-        raise "Active side must be w or b"
+        {:error, "Active side must be w or b" }
 
       true ->
-        splitted_fen
+        {:ok, splitted_fen}
     end
   end
 
@@ -134,7 +143,7 @@ defmodule Chess.Position do
   end
 
   defp check_en_passant(%Figure{color: color}, _, move_to) do
-    {y_point, _} = Integer.parse(String.last(move_to))
+    {y_point, _} = move_to |> String.last() |> Integer.parse()
 
     if color == "white" do
       "#{String.first(move_to)}#{y_point - 1}"
@@ -150,32 +159,31 @@ defmodule Chess.Position do
   defp add_full_move(full_move, _), do: full_move
 
   defp calc_position_from_squares(squares) do
-    @x_lines
-    |> Enum.map(fn x -> check_line(@y_lines, squares, x, "", 0) end)
+    @y_lines
+    |> Enum.map(fn y -> check_line(@x_lines, squares, y, "", 0) end)
     |> Enum.join("/")
   end
 
-  defp parse(:error), do: raise "There is no valid integer for moves"
   defp parse({result, _}), do: result
 
   defp check_line(_, _, _, _, 8), do: "8"
   defp check_line([], _, _, acc, _), do: acc
 
-  defp check_line([head | tail], squares, x_line, acc, spaces) do
-    result = check_figure(squares[:"#{head}#{x_line}"])
+  defp check_line([head | tail], squares, y_line, acc, spaces) do
+    result = check_figure(squares[:"#{head}#{y_line}"])
 
     cond do
       result == 1 && tail == [] ->
         acc <> "#{spaces + 1}"
 
       result == 1 ->
-        check_line(tail, squares, x_line, acc, spaces + 1)
+        check_line(tail, squares, y_line, acc, spaces + 1)
 
       spaces != 0 ->
-        check_line(tail, squares, x_line, acc <> "#{spaces}#{result}", 0)
+        check_line(tail, squares, y_line, acc <> "#{spaces}#{result}", 0)
 
       true ->
-        check_line(tail, squares, x_line, acc <> result, 0)
+        check_line(tail, squares, y_line, acc <> result, 0)
     end
   end  
 
