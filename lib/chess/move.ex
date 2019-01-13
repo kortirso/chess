@@ -142,6 +142,7 @@ defmodule Chess.Move do
       # render error message
       {:error, message} -> {:error, message}
       # continue
+      # TODO: INTEGRATE END MOVE PROCESS
       _ -> complete_move(game, current_position, parsed_move, figure, route_and_distance, result)
     end
   end
