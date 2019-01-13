@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Modified
 - error handling for Position module
 - parsing move process
+- checking valid figure for move
 
 ## [0.1.1] - 2019-01-12
 ### Modified

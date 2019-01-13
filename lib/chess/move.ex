@@ -34,11 +34,27 @@ defmodule Chess.Move do
     current_position = Position.new(game.current_fen)
 
     case do_parse_move(move, current_position.active) do
-      # continue
-      [move_from, move_to] -> 1
       # render error message
-      result -> result
+      {:error, message} -> {:error, message}
+      # continue
+      parsed_move -> find_figure(game, current_position, parsed_move)
     end
+  end
+
+  # checking source square for existed figure for move
+  defp find_figure(game, current_position, [move_from, move_to]) do
+    case do_find_figure(game.squares[:"#{move_from}"], current_position.active) do
+      # render error message
+      {:error, message} -> {:error, message}
+      # continue
+      figure -> 1
+    end
+  end
+
+  defp do_find_figure(nil, _), do: {:error, "Square does not have figure for move"}
+
+  defp do_find_figure(%Figure{color: color} = figure, active_player) do
+    if String.first(color) != active_player, do: {:error, "This is not move of #{color} player"}, else: figure
   end
 
   @doc """
@@ -73,13 +89,6 @@ defmodule Chess.Move do
     end
   end
   """
-
-  defp find_figure(nil), do: raise "Square does not have figure for move"
-  defp find_figure(figure), do: figure
-
-  defp check_active_player(%Figure{color: color}, active) do
-    if String.first(color) != active, do: raise "This is not move of #{color} player"
-  end
 
   defp check_route_for_figure(figure, move_from, move_to, castling) do
     route = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
