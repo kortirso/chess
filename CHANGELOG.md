@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Modified
 - error handling for Position module
+- parsing move process
 
 ## [0.1.1] - 2019-01-12
 ### Modified

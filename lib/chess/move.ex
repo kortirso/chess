@@ -18,14 +18,35 @@ defmodule Chess.Move do
   use Move.{Parse, FigureRoute, Barriers, Destination, EndMove}
 
   @doc """
-  Makes new move
+  Make new move in chess game
+
+  ## Examples
+
+      iex> Chess.Move.new(%Chess.Game{}, "e2-e4")
+      {:ok, %Chess.Game{}}
+
+      iex> Chess.Move.new(%Chess.Game{}, "e2-e5")
+      {:error, ""}
+
   """
 
+  def new(%Game{} = game, move) when is_binary(move) do
+    current_position = Position.new(game.current_fen)
+
+    case do_parse_move(move, current_position.active) do
+      # continue
+      [move_from, move_to] -> 1
+      # render error message
+      result -> result
+    end
+  end
+
+  @doc """
   def new(%Game{squares: squares, current_fen: current_fen, history: history, status: status}, move) when is_binary(move) do
     try do
       current_position = Position.new(current_fen)
       [move_from, move_to] = do_parse_move(move, current_position.active)
-      figure = find_figure(squares[:"#{move_from}"])
+      figure = find_figure(squares[:"#move_from}"])
       check_active_player(figure, current_position.active)
       [route, distance] = check_route_for_figure(figure, move_from, move_to, current_position.castling)
 
@@ -35,7 +56,7 @@ defmodule Chess.Move do
         check_barriers_on_route(squares, rook_from, rook_route, rook_distance)
       end
 
-      [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#{move_to}"], figure, current_position.en_passant, distance)
+      [is_attack, is_castling, squares] = check_destination(squares, move_from, move_to, squares[:"#move_to}"], figure, current_position.en_passant, distance)
       [status, check] = end_move(squares, current_position.active, status)
 
       {:ok,
@@ -51,6 +72,7 @@ defmodule Chess.Move do
       error -> {:error, error.message}
     end
   end
+  """
 
   defp find_figure(nil), do: raise "Square does not have figure for move"
   defp find_figure(figure), do: figure
