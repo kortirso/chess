@@ -163,7 +163,7 @@ defmodule Chess.Move do
 
       # invalid moves for check status
       _ ->
-        1
+        {:error, "Invalid move"}
     end
   end
 end

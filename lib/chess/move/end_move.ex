@@ -15,23 +15,104 @@ defmodule Chess.Move.EndMove do
       end
 
       defp check_attack(squares, active) do
-        {opponent_king_square, _} = Enum.find(squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && String.first(color) != active end)
-        active_figures = Enum.filter(squares, fn {_, %Figure{color: color}} -> String.first(color) == active end)
-        attackers = define_squares_under_attack(squares, active_figures, opponent_king_square)
+        {opponent_king_square, opponent_king} = Enum.find(squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && String.first(color) != active end)
+        active_figures = define_active_figures(squares, active)
+        attackers = define_attackers(active_figures, opponent_king_square)
 
-        IO.inspect attackers
-
-        if length(attackers) > 0 do
-          {:ok, [:check, active]}
-        else
-          {:ok, [:playing, nil]}
+        case length(attackers) do
+          # no attackers
+          0 -> {:ok, [:playing, nil]}
+          # 1 attacker
+          1 -> check_for_one_attacker(opponent_king_square, opponent_king, active_figures, squares, active, attackers)
+          # more than 1 attacker
+          _ -> check_for_many_attackers(opponent_king_square, opponent_king, active_figures, squares, active)
         end
       end
 
-      defp define_squares_under_attack(squares, active_figures, opponent_king_square) do
-        active_figures
+      defp check_for_one_attacker(opponent_king_square, opponent_king, active_figures, squares, active, attackers) do
+        case king_escape_is_possible?(opponent_king_square, opponent_king, active_figures, squares, active) do
+          # if king can avoid check by self
+          true -> {:ok, [:playing, "check"]}
+          # try to avoid by using another figures
+          false -> can_block_attackers?(opponent_king_square, squares, active, attackers)
+        end
+      end
+
+      defp check_for_many_attackers(opponent_king_square, opponent_king, active_figures, squares, active) do
+        case king_escape_is_possible?(opponent_king_square, opponent_king, active_figures, squares, active) do
+          true -> {:ok, [:playing, nil]}
+          false -> {:ok, [:completed, "mat"]}
+        end
+      end
+
+      defp can_block_attackers?(opponent_king_square, squares, active, attackers) do
+        squares_for_block =
+          define_defense_figures(squares, active)
+          |> Enum.filter(fn {{_, %Figure{type: type}}, _} -> type != "k" end)
+          |> Enum.map(fn {_, squares} -> squares end)
+          |> List.flatten()
+          |> Enum.uniq()
+
+        {{figure_square, _}, _} = Enum.at(attackers, 0)
+        route = calc_route(String.split(Atom.to_string(figure_square), "", trim: true), String.split(Atom.to_string(opponent_king_square), "", trim: true))
+        distance = calc_distance(route)
+
+        squares_with_attack =
+          figure_square
+          |> Atom.to_string()
+          |> coordinates()
+          |> calc_from_index()
+          |> collect_squares_with_attack(route, distance, 0, [])
+          |> Enum.map(fn x -> String.to_atom(x) end)
+
+        IO.inspect squares_with_attack
+        IO.inspect squares_for_block
+
+        # TODO: add checking future game status to check hide attackers after opponent turn
+        case Enum.any?(squares_with_attack, fn x -> x in squares_for_block end) do
+          true -> {:ok, [:playing, "check by #{active}"]}
+          false -> {:ok, [:completed, "mat"]}
+        end
+      end
+
+      defp collect_squares_with_attack([move_from_x_index, move_from_y_index], [x_direction, y_direction], distance, step, acc) when distance > step do
+        move_to_x_index = Kernel.trunc(move_from_x_index + step * x_direction)
+        move_to_y_index = Kernel.trunc(move_from_y_index + step * y_direction)
+        square = "#{Enum.at(@x_fields, move_to_x_index)}#{Enum.at(@y_fields, move_to_y_index)}"
+        acc = [square | acc]
+        collect_squares_with_attack([move_from_x_index, move_from_y_index], [x_direction, y_direction], distance, step + 1, acc)
+      end
+
+      defp collect_squares_with_attack(_, _, _, _, acc), do: acc
+
+      defp king_escape_is_possible?(opponent_king_square, opponent_king, active_figures, squares, active) do
+        attacked_squares = Enum.map(active_figures, fn {_, squares} -> squares end) |> List.flatten() |> Enum.uniq()
+        possible_king_moves =
+          check_attacked_squares(squares, {opponent_king_square, opponent_king})
+          |> List.flatten()
+          |> Enum.filter(fn x ->
+            if Keyword.has_key?(squares, x) do
+              %Figure{color: color} = squares[x]
+              String.first(color) == active
+            else
+              true
+            end
+          end)
+          |> Enum.filter(fn x -> x not in attacked_squares end)
+
+        length(possible_king_moves) > 0
+      end
+
+      defp define_active_figures(squares, active) do
+        squares
+        |> Enum.filter(fn {_, %Figure{color: color}} -> String.first(color) == active end)
         |> calc_attacked_squares(squares)
-        |> Enum.filter(fn {_, squares} -> opponent_king_square in squares end)
+      end
+
+      defp define_defense_figures(squares, active) do
+        squares
+        |> Enum.filter(fn {_, %Figure{color: color}} -> String.first(color) != active end)
+        |> calc_attacked_squares(squares)
       end
 
       defp calc_attacked_squares(figures, squares) do
@@ -41,6 +122,10 @@ defmodule Chess.Move.EndMove do
             check_attacked_squares(squares, x) |> List.flatten()
           }
         end)
+      end
+
+      defp define_attackers(active_figures, opponent_king_square) do
+        Enum.filter(active_figures, fn {_, squares} -> opponent_king_square in squares end)
       end
 
       defp check_attacked_squares(squares, {square, %Figure{type: type}}) when type in ["k", "q"] do
@@ -106,12 +191,22 @@ defmodule Chess.Move.EndMove do
         if x_square_index in @indexes && y_square_index in @indexes do
           square = :"#{Enum.at(@x_fields, x_square_index)}#{Enum.at(@y_fields, y_square_index)}"
           acc = [square | acc]
+
+          # check barriers on the route
           if Keyword.has_key?(squares, square) do
-            check_attacked_square(squares, [x_index, y_index], [x_route, y_route], limit + 1, limit, acc)
+            %Figure{type: type} = squares[square]
+            case type do
+              # calculate attacked squares behind king
+              "k" -> check_attacked_square(squares, [x_index, y_index], [x_route, y_route], current_step + 1, limit, acc)
+              # stop calculating attacked squares
+              _ -> check_attacked_square(squares, [x_index, y_index], [x_route, y_route], limit + 1, limit, acc)
+            end
           else
+            # add empty field to attacked squares
             check_attacked_square(squares, [x_index, y_index], [x_route, y_route], current_step + 1, limit, acc)
           end
         else
+          # stop calculating attacked squares
           check_attacked_square(squares, [x_index, y_index], [x_route, y_route], limit + 1, limit, acc)
         end
       end
