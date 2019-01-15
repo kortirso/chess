@@ -11,8 +11,8 @@ defmodule Chess.Move do
   @diagonals [[-1, -1], [-1, 1], [1, 1], [1, -1]]
   @linears [[-1, 0], [0, 1], [1, 0], [0, -1]]
   @knights [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2]]
-  @white_pions [[1, 1], [-1, 1]]
-  @black_pions [[1, -1], [-1, -1]]
+  @white_pions [[1, -1], [-1, -1]]
+  @black_pions [[1, 1], [-1, 1]]
 
   alias Chess.{Game, Move, Position, Figure}
   use Move.{Parse, FigureRoute, Barriers, Destination, EndMove}
@@ -134,29 +134,36 @@ defmodule Chess.Move do
 
   # check destanation point
   defp check_destination(game, current_position, [_, move_to] = parsed_move, figure, [_, distance] = route_and_distance) do
-    result = do_check_destination(game.squares, parsed_move, game.squares[:"#{move_to}"], figure, current_position.en_passant, distance)
-    # result
+    after_move_status = do_check_destination(game.squares, parsed_move, game.squares[:"#{move_to}"], figure, current_position.en_passant, distance)
+    # after_move_status
     # [is_attack, is_castling, new_squares]
 
-    case result do
+    case after_move_status do
       # render error message
       {:error, message} -> {:error, message}
       # continue
-      # TODO: INTEGRATE END MOVE PROCESS
-      _ -> complete_move(game, current_position, parsed_move, figure, route_and_distance, result)
+      _ -> complete_move(game, current_position, parsed_move, figure, route_and_distance, after_move_status)
     end
   end
 
   # complete move
   defp complete_move(game, current_position, [move_from, move_to], figure, [_, distance], [is_attack, is_castling, new_squares]) do
-    {:ok,
-      %Game{
-        squares: new_squares,
-        current_fen: Position.new(new_squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen(),
-        history: [%{fen: game.current_fen, move: "#{move_from}-#{move_to}"} | game.history],
-        status: :playing,
-        check: nil
-      }
-    }
+    case end_move(new_squares, current_position.active, game.status) do
+      # valid move
+      {:ok, [status, check]} ->
+        {:ok,
+          %Game{
+            squares: new_squares,
+            current_fen: Position.new(new_squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen(),
+            history: [%{fen: game.current_fen, move: "#{move_from}-#{move_to}"} | game.history],
+            status: status,
+            check: check
+          }
+        }
+
+      # invalid moves for check status
+      _ ->
+        1
+    end
   end
 end
