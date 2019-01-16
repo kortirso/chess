@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - check attackers for the opponent's king
 - check try to destroy king's attacker and try to block king's attacker route
+- make virtual move after avoiding check to verify valid move
 
 ## [0.2.0] - 2019-01-13
 ### Modified

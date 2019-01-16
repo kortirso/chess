@@ -38,5 +38,5 @@ defmodule Chess.Game do
       iex> Chess.Game.play(%Game{}, "e2-e4")
 
   """
-  def play(%Game{} = game, move) when is_binary(move), do: Move.new(game, move)
+  def play(%Game{} = game, move, type \\ :real) when is_binary(move), do: Move.new(game, move, type)
 end

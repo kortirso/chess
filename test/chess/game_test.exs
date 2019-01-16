@@ -31,4 +31,14 @@ defmodule Chess.GameTest do
 
     assert %Game{status: :completed, check: "mat"} = game
   end
+
+  test "different moves", state do
+    {:ok, game} = Game.play(state[:game], "e2-e4")
+    {:ok, game} = Game.play(game, "e7-e5")
+    {:ok, game} = Game.play(game, "d1-h5")
+    {:ok, game} = Game.play(game, "a7-a5")
+    {:ok, game} = Game.play(game, "h5-e5")
+
+    assert %Game{status: :check, check: "w"} = game
+  end
 end

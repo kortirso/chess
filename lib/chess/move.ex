@@ -32,7 +32,25 @@ defmodule Chess.Move do
 
   """
 
-  def new(%Game{} = game, move) when is_binary(move) do
+  def new(%Game{} = game, move, :virtual) when is_binary(move) do
+    current_position = Position.new(game.current_fen)
+    [move_from, move_to] = do_parse_move(move, current_position.active)
+    figure = do_find_figure(game.squares[:"#{move_from}"], current_position.active)
+    [_, distance] = calc_route_and_distance([move_from, move_to])
+    [is_attack, is_castling, new_squares] = do_check_destination(game.squares, [move_from, move_to], game.squares[:"#{move_to}"], figure, current_position.en_passant, distance)
+
+    {:ok,
+      %Game{
+        squares: new_squares,
+        current_fen: Position.new(new_squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen(),
+        history: [%{fen: game.current_fen, move: "#{move_from}-#{move_to}"} | game.history],
+        status: :check,
+        check: current_position.active
+      }
+    }
+  end
+
+  def new(%Game{} = game, move, _) when is_binary(move) do
     current_position = Position.new(game.current_fen)
 
     case do_parse_move(move, current_position.active) do
@@ -149,8 +167,8 @@ defmodule Chess.Move do
   end
 
   # complete move
-  defp complete_move(game, current_position, [move_from, move_to], figure, [_, distance], [is_attack, is_castling, new_squares]) do
-    case end_move(new_squares, current_position.active, game.status) do
+  defp complete_move(game, current_position, [move_from, move_to] = parsed_move, figure, [_, distance], [is_attack, is_castling, new_squares]) do
+    case end_move(game, parsed_move, new_squares, current_position.active) do
       # valid move
       {:ok, [status, check]} ->
         {:ok,
