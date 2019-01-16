@@ -43,7 +43,7 @@ defmodule Chess.Move do
       %Game{
         squares: new_squares,
         current_fen: Position.new(new_squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen(),
-        history: [%{fen: game.current_fen, move: "#{move_from}-#{move_to}"} | game.history],
+        history: [],
         status: :check,
         check: current_position.active
       }

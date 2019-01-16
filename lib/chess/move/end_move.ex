@@ -11,7 +11,18 @@ defmodule Chess.Move.EndMove do
         case game.status do
           :playing -> check_attack(game, parsed_move, squares, active)
           :completed -> {:error, "The game is over"}
-          _ -> {:ok, [:playing, nil]} # add here check for safety king
+          :check -> check_avoiding(game, parsed_move, squares, active)
+        end
+      end
+
+      defp check_avoiding(game, parsed_move, squares, active) do
+        {king_square, king} = Enum.find(squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && String.first(color) == active end)
+        active_figures = define_active_figures(squares, opponent(active))
+        attackers = define_attackers(active_figures, king_square)
+
+        case length(attackers) do
+          0 -> check_attack(game, parsed_move, squares, active)
+          _ -> {:error, "You must avoid check"}
         end
       end
 
@@ -21,14 +32,14 @@ defmodule Chess.Move.EndMove do
         attackers = define_attackers(active_figures, opponent_king_square)
 
         case length(attackers) do
-          # no attackers
           0 -> {:ok, [:playing, nil]}
-          # 1 attacker
           1 -> check_for_one_attacker(game, parsed_move, opponent_king_square, opponent_king, active_figures, squares, active, attackers)
-          # more than 1 attacker
           _ -> check_for_many_attackers(opponent_king_square, opponent_king, active_figures, squares, active)
         end
       end
+
+      defp opponent("w"), do: "b"
+      defp opponent(_), do: "w"
 
       defp check_for_one_attacker(game, parsed_move, opponent_king_square, opponent_king, active_figures, squares, active, attackers) do
         {{attacker_square, _}, _} = Enum.at(attackers, 0)
@@ -44,7 +55,7 @@ defmodule Chess.Move.EndMove do
       defp check_for_many_attackers(opponent_king_square, opponent_king, active_figures, squares, active) do
         case king_escape_is_possible?(opponent_king_square, opponent_king, active_figures, squares, active) do
           true -> {:ok, [:playing, nil]}
-          false -> {:ok, [:completed, "mat"]}
+          false -> {:ok, [:completed, active]}
         end
       end
 
@@ -70,7 +81,7 @@ defmodule Chess.Move.EndMove do
           # if yes -> continue
           true -> {:ok, [:check, active]}
           # if no -> mat
-          false -> {:ok, [:completed, "mat"]}
+          false -> {:ok, [:completed, active]}
         end
       end
 
@@ -172,8 +183,8 @@ defmodule Chess.Move.EndMove do
         end)
       end
 
-      defp define_attackers(active_figures, opponent_king_square) do
-        Enum.filter(active_figures, fn {_, squares} -> opponent_king_square in squares end)
+      defp define_attackers(active_figures, king_square) do
+        Enum.filter(active_figures, fn {_, squares} -> king_square in squares end)
       end
 
       defp check_attacked_squares(squares, {square, %Figure{type: type}}, _) when type in ["k", "q"] do

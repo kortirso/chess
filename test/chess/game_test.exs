@@ -17,7 +17,11 @@ defmodule Chess.GameTest do
     {:ok, game} = Game.play(game, "g2-g4")
     {:ok, game} = Game.play(game, "d8-h4")
 
-    assert %Game{status: :completed, check: "mat"} = game
+    assert %Game{status: :completed, check: "b"} = game
+
+    {:error, message} = Game.play(game, "a2-a3")
+
+    assert message == "The game is over"
   end
 
   test "scholar's mate", state do
@@ -29,7 +33,7 @@ defmodule Chess.GameTest do
     {:ok, game} = Game.play(game, "g8-f6")
     {:ok, game} = Game.play(game, "h5-f7")
 
-    assert %Game{status: :completed, check: "mat"} = game
+    assert %Game{status: :completed, check: "w"} = game
   end
 
   test "different moves", state do
@@ -40,5 +44,9 @@ defmodule Chess.GameTest do
     {:ok, game} = Game.play(game, "h5-e5")
 
     assert %Game{status: :check, check: "w"} = game
+
+    {:error, message} = Game.play(game, "b7-b5")
+
+    assert message == "You must avoid check"
   end
 end
