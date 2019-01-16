@@ -15,6 +15,36 @@ def deps do
 end
 ```
 
+## Start new game
+
+```elixir
+  alias Chess.Game
+
+  Game.new()
+```
+
+New game will be created with squares and figures, FEN-notation, and game's status
+
+## Make move
+
+```elixir
+  Game.play(%Game{}, "e2-e4")
+```
+
+After valid move game object will contain new figure's position and FEN-notation
+
+## TODO
+
+- [X] Create game
+- [ ] Create game from FEN-notation
+- [X] Figure movements
+- [X] Pion's en passant
+- [X] Castling
+- [X] Checkmate
+- [X] Checking possible checkmate for next turn
+- [ ] Draw
+- [ ] Pion's promotion at last line
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/kortirso/chess.

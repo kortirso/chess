@@ -31,11 +31,15 @@ defmodule Chess.Game do
   ## Parameters
 
     - game: game object
-    - move: move represents like e2-e4
+    - move: move is represented like e2-e4
 
   ## Examples
 
       iex> Chess.Game.play(%Game{}, "e2-e4")
+      {:ok, %Game{}}
+
+      iex> Chess.Game.play(%Game{}, "e2-e5")
+      {:error, ""}
 
   """
   def play(%Game{} = game, move, type \\ :real) when is_binary(move), do: Move.new(game, move, type)
