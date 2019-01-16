@@ -13,6 +13,8 @@ defmodule Chess.Move do
   @knights [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2]]
   @white_pions [[1, -1], [-1, -1]]
   @black_pions [[1, 1], [-1, 1]]
+  @white_pions_moves [[0, -1], [0, -1]]
+  @black_pions_moves [[0, 1], [0, 1]]
 
   alias Chess.{Game, Move, Position, Figure}
   use Move.{Parse, FigureRoute, Barriers, Destination, EndMove}

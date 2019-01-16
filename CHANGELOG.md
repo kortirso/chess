@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Added
 - check attackers for the opponent's king
+- check try to destroy king's attacker and try to block king's attacker route
 
 ## [0.2.0] - 2019-01-13
 ### Modified
