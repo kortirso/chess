@@ -155,8 +155,7 @@ defmodule Chess.Move do
   # check destanation point
   defp check_destination(game, current_position, [_, move_to] = parsed_move, figure, [_, distance] = route_and_distance) do
     after_move_status = do_check_destination(game.squares, parsed_move, game.squares[:"#{move_to}"], figure, current_position.en_passant, distance)
-    # after_move_status
-    # [is_attack, is_castling, new_squares]
+    # after_move_status == [is_attack, is_castling, new_squares]
 
     case after_move_status do
       # render error message
@@ -182,8 +181,8 @@ defmodule Chess.Move do
         }
 
       # invalid moves for check status
-      _ ->
-        {:error, "Invalid move"}
+      result ->
+        result
     end
   end
 end

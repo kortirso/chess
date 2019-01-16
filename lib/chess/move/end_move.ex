@@ -10,6 +10,7 @@ defmodule Chess.Move.EndMove do
       defp end_move(game, parsed_move, squares, active) do
         case game.status do
           :playing -> check_attack(game, parsed_move, squares, active)
+          :completed -> {:error, "The game is over"}
           _ -> {:ok, [:playing, nil]} # add here check for safety king
         end
       end
