@@ -127,30 +127,30 @@ defmodule Chess.Move do
     when type == "n" or distance == 1,
     do: check_destination(game, current_position, parsed_move, figure, route_and_distance)
 
-  defp check_barriers_on_route(game, current_position, [move_from, move_to] = parsed_move, figure, route_and_distance) do
-    result = do_check_barriers_on_route(game.squares, move_from, route_and_distance)
+  # check castling
+  defp check_barriers_on_route(game, current_position, [move_from, move_to] = parsed_move, %Figure{type: "k"} = figure, route_and_distance) do
+    [route, distance] = define_rook_move_for_castling(move_to)
+    result = do_check_barriers_on_route(game.squares, move_from, [route, distance])
 
     cond do
-      # check rook for castling
-      result == {:ok} && figure.type == "k" ->
-        [rook_from, rook_route_and_distance] = define_rook_move_for_castling(move_to)
-        check_barriers_on_route(game, current_position, [rook_from, nil], game.squares[:"#{rook_from}"],rook_route_and_distance)
-
-      # continue
-      result == {:ok} ->
-        check_destination(game, current_position, parsed_move, figure, route_and_distance)
-
-      # render error message
-      true ->
-        result
+      result == {:ok} -> check_destination(game, current_position, parsed_move, figure, route_and_distance)
+      true -> result
     end
   end
 
-  defp define_rook_move_for_castling("g1"), do: ["h1", [[-2, 0], 2]]
-  defp define_rook_move_for_castling("c1"), do: ["a1", [[3, 0], 3]]
-  defp define_rook_move_for_castling("g8"), do: ["h8", [[-2, 0], 2]]
-  defp define_rook_move_for_castling("c8"), do: ["a8", [[3, 0], 3]]
-  defp define_rook_move_for_castling(_), do: ["", [[0, 0], 0]]
+  defp check_barriers_on_route(game, current_position, [move_from, _] = parsed_move, figure, route_and_distance) do
+    result = do_check_barriers_on_route(game.squares, move_from, route_and_distance)
+
+    cond do
+      # continue
+      result == {:ok} -> check_destination(game, current_position, parsed_move, figure, route_and_distance)
+      # render error message
+      true -> result
+    end
+  end
+
+  defp define_rook_move_for_castling(square) when square in ["g1", "g8"], do: [[1, 0], 3]
+  defp define_rook_move_for_castling(square) when square in ["c1", "c8"], do: [[-1, 0], 4]
 
   # check destanation point
   defp check_destination(game, current_position, [_, move_to] = parsed_move, figure, [_, distance] = route_and_distance) do

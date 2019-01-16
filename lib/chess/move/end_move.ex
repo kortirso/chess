@@ -259,7 +259,6 @@ defmodule Chess.Move.EndMove do
         if x_square_index in @indexes && y_square_index in @indexes do
           square = :"#{Enum.at(@x_fields, x_square_index)}#{Enum.at(@y_fields, y_square_index)}"
           acc = [square | acc]
-
           # check barriers on the route
           if Keyword.has_key?(squares, square) do
             %Figure{type: type} = squares[square]
