@@ -10,7 +10,7 @@ by adding `chess` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:chess, "~> 0.3.2"}
+    {:chess, "~> 0.3.3"}
   ]
 end
 ```
@@ -33,6 +33,14 @@ New game will be created with squares and figures, FEN-notation, and game's stat
 
 After valid move game object will contain new figure's position and FEN-notation
 
+### Pion's promotion
+
+```elixir
+  Game.play(%Game{}, "e7-e8", "q")
+```
+
+Add third option if pion achives last line, one from [q|n|r|b], default - q
+
 ## TODO
 
 - [X] Create game
@@ -43,7 +51,7 @@ After valid move game object will contain new figure's position and FEN-notation
 - [X] Checkmate
 - [X] Checking possible checkmate for next turn
 - [ ] Draw
-- [ ] Pion's promotion at last line
+- [X] Pion's promotion at last line
 
 ## Contributing
 
