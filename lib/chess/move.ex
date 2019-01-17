@@ -16,6 +16,16 @@ defmodule Chess.Move do
   @white_pions_moves [[0, -1], [0, -1]]
   @black_pions_moves [[0, 1], [0, 1]]
 
+  defstruct value: "",
+            from: "",
+            to: "",
+            figure: nil,
+            route: [],
+            distance: 0,
+            is_attack: false,
+            is_castling: false,
+            squares: []
+
   alias Chess.{Game, Move, Position, Figure}
   use Move.{Parse, FigureRoute, Barriers, Destination, EndMove}
 
@@ -32,42 +42,32 @@ defmodule Chess.Move do
 
   """
 
-  def new(%Game{} = game, move, :virtual) when is_binary(move) do
-    current_position = Position.new(game.current_fen)
-    [move_from, move_to] = do_parse_move(move, current_position.active)
-    figure = do_find_figure(game.squares[:"#{move_from}"], current_position.active)
-    [_, distance] = calc_route_and_distance([move_from, move_to])
-    [is_attack, is_castling, new_squares] = do_check_destination(game.squares, [move_from, move_to], game.squares[:"#{move_to}"], figure, current_position.en_passant, distance)
-
-    {:ok,
-      %Game{
-        squares: new_squares,
-        current_fen: Position.new(new_squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen(),
-        history: [],
-        status: :check,
-        check: current_position.active
-      }
-    }
-  end
-
-  def new(%Game{} = game, move, _) when is_binary(move) do
+  def new(%Game{} = game, value) when is_binary(value) do
     current_position = Position.new(game.current_fen)
 
-    case do_parse_move(move, current_position.active) do
+    case do_parse_move(value, current_position.active) do
       # render error message
-      {:error, message} -> {:error, message}
+      {:error, message} ->
+        {:error, message}
+
       # continue
-      parsed_move -> find_figure(game, current_position, parsed_move)
+      [from, to] ->
+        %Move{value: value, from: from, to: to}
+        |> find_figure(game, current_position)
     end
   end
 
   # checking source square for existed figure for move
-  defp find_figure(game, current_position, [move_from, _] = parsed_move) do
-    case do_find_figure(game.squares[:"#{move_from}"], current_position.active) do
+  defp find_figure(move, game, current_position) do
+    case do_find_figure(game.squares[:"#{move.from}"], current_position.active) do
       # render error message
-      {:error, message} -> {:error, message}
+      {:error, message} ->
+        {:error, message}
+
       # continue
-      figure -> check_route_for_figure(game, current_position, parsed_move, figure)
+      figure ->
+        %{move | figure: figure}
+        |> calc_route_for_figure(game, current_position)
     end
   end
 
@@ -78,18 +78,22 @@ defmodule Chess.Move do
   end
 
   # calculates route and distance for figure's move
-  defp check_route_for_figure(game, current_position, parsed_move, figure) do
-    case calc_route_and_distance(parsed_move) do
+  defp calc_route_for_figure(move, game, current_position) do
+    case calc_route_and_distance(move) do
       # render error message
-      {:error, message} -> {:error, message}
+      {:error, message} ->
+        {:error, message}
+
       # continue
-      route_and_distance -> do_check_route_for_figure(game, current_position, parsed_move, figure, route_and_distance)
+      [route, distance] ->
+        %{move | route: route, distance: distance}
+        |> check_route_for_figure(game, current_position)
     end
   end
 
-  defp calc_route_and_distance([move_from, move_to]) do
+  defp calc_route_and_distance(move) do
     # calculate route direction
-    route = calc_route(String.split(move_from, "", trim: true), String.split(move_to, "", trim: true))
+    route = calc_route(String.split(move.from, "", trim: true), String.split(move.to, "", trim: true))
     # calculate distance of move
     distance = calc_distance(route)
 
@@ -99,10 +103,10 @@ defmodule Chess.Move do
     end
   end
 
-  defp calc_route([move_from_x, move_from_y], [move_to_x, move_to_y]) do
+  defp calc_route([move_from_x, move_from_y], [to_x, to_y]) do
     [
-      Enum.find_index(@x_fields, fn x -> x == move_to_x end) - Enum.find_index(@x_fields, fn x -> x == move_from_x end),
-      Enum.find_index(@y_fields, fn y -> y == move_to_y end) - Enum.find_index(@y_fields, fn y -> y == move_from_y end)
+      Enum.find_index(@x_fields, fn x -> x == to_x end) - Enum.find_index(@x_fields, fn x -> x == move_from_x end),
+      Enum.find_index(@y_fields, fn y -> y == to_y end) - Enum.find_index(@y_fields, fn y -> y == move_from_y end)
     ]
   end
 
@@ -112,40 +116,42 @@ defmodule Chess.Move do
     |> Enum.max()
   end
 
-  defp do_check_route_for_figure(game, current_position, [move_from, _] = parsed_move, figure, [route, _] = route_and_distance) do
-    case check_figure_route(figure, route, String.split(move_from, "", trim: true), current_position.castling) do
+  defp check_route_for_figure(move, game, current_position) do
+    case check_figure_route(move.figure, move.route, String.split(move.from, "", trim: true), current_position.castling) do
       # render error message
       {:error, message} -> {:error, message}
       # continue
-      _ -> check_barriers_on_route(game, current_position, parsed_move, figure, route_and_distance)
+      _ -> check_barriers_on_route(move, game, current_position, move.figure, move.distance)
     end
   end
 
   # check barriers on the figure's route
   # except knight's move and moves to distance in 1 square
-  defp check_barriers_on_route(game, current_position, parsed_move, %Figure{type: type} = figure, [_, distance] = route_and_distance)
+  defp check_barriers_on_route(move, game, current_position, %Figure{type: type}, distance)
     when type == "n" or distance == 1,
-    do: check_destination(game, current_position, parsed_move, figure, route_and_distance)
+    do: check_destination(move, game, current_position)
 
   # check castling
-  defp check_barriers_on_route(game, current_position, [move_from, move_to] = parsed_move, %Figure{type: "k"} = figure, route_and_distance) do
-    [route, distance] = define_rook_move_for_castling(move_to)
-    result = do_check_barriers_on_route(game.squares, move_from, [route, distance])
+  defp check_barriers_on_route(move, game, current_position, %Figure{type: "k"}, _) do
+    [route, distance] = define_rook_move_for_castling(move.to)
+    result = do_check_barriers_on_route(game.squares, move.from, route, distance)
 
-    cond do
-      result == {:ok} -> check_destination(game, current_position, parsed_move, figure, route_and_distance)
-      true -> result
+    case result do
+      # continue
+      {:ok} -> check_destination(move, game, current_position)
+      # render error message
+      _ -> result
     end
   end
 
-  defp check_barriers_on_route(game, current_position, [move_from, _] = parsed_move, figure, route_and_distance) do
-    result = do_check_barriers_on_route(game.squares, move_from, route_and_distance)
+  defp check_barriers_on_route(move, game, current_position, _, _) do
+    result = do_check_barriers_on_route(game.squares, move.from, move.route, move.distance)
 
-    cond do
+    case result do
       # continue
-      result == {:ok} -> check_destination(game, current_position, parsed_move, figure, route_and_distance)
+      {:ok} -> check_destination(move, game, current_position)
       # render error message
-      true -> result
+      _ -> result
     end
   end
 
@@ -153,28 +159,31 @@ defmodule Chess.Move do
   defp define_rook_move_for_castling(square) when square in ["c1", "c8"], do: [[-1, 0], 4]
 
   # check destanation point
-  defp check_destination(game, current_position, [_, move_to] = parsed_move, figure, [_, distance] = route_and_distance) do
-    after_move_status = do_check_destination(game.squares, parsed_move, game.squares[:"#{move_to}"], figure, current_position.en_passant, distance)
-    # after_move_status == [is_attack, is_castling, new_squares]
+  defp check_destination(move, game, current_position) do
+    after_move_status = do_check_destination(game.squares, move, game.squares[:"#{move.to}"], current_position.en_passant)
 
     case after_move_status do
       # render error message
-      {:error, message} -> {:error, message}
+      {:error, message} ->
+        {:error, message}
+
       # continue
-      _ -> complete_move(game, current_position, parsed_move, figure, route_and_distance, after_move_status)
+      [is_attack, is_castling, squares] ->
+        %{move | is_attack: is_attack, is_castling: is_castling, squares: squares}
+        |> complete_move(game, current_position)
     end
   end
 
   # complete move
-  defp complete_move(game, current_position, [move_from, move_to] = parsed_move, figure, [_, distance], [is_attack, is_castling, new_squares]) do
-    case end_move(game, parsed_move, new_squares, current_position.active) do
+  defp complete_move(move, game, current_position) do
+    case end_move(move, game, current_position) do
       # valid move
       {:ok, [status, check]} ->
         {:ok,
           %Game{
-            squares: new_squares,
-            current_fen: Position.new(new_squares, current_position, figure, distance, move_to, is_attack, is_castling) |> Position.to_fen(),
-            history: [%{fen: game.current_fen, move: "#{move_from}-#{move_to}"} | game.history],
+            squares: move.squares,
+            current_fen: Position.new(move, current_position) |> Position.to_fen(),
+            history: [%{fen: game.current_fen, move: move.value} | game.history],
             status: status,
             check: check
           }

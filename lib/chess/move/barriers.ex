@@ -5,7 +5,7 @@ defmodule Chess.Move.Barriers do
 
   defmacro __using__(_opts) do
     quote do
-      defp do_check_barriers_on_route(squares, move_from, [route, distance]) do
+      defp do_check_barriers_on_route(squares, move_from, route, distance) do
         check_squares_for_barrier(
           squares,
           move_from |> coordinates() |> calc_from_index(),

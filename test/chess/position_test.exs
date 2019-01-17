@@ -1,7 +1,7 @@
 defmodule Chess.PositionTest do
   use ExUnit.Case
 
-  alias Chess.{Game, Position, Figure}
+  alias Chess.{Game, Position, Figure, Move}
 
   test "create position" do
     %Position{position: position, active: active, castling: castling, en_passant: en_passant, half_move: half_move, full_move: full_move} = Position.new
@@ -41,9 +41,12 @@ defmodule Chess.PositionTest do
     game = Game.new()
     squares = game.squares
 
+    figure = %Figure{color: "white", type: "p"}
     squares = Keyword.delete(squares, :e2)
-    squares = Keyword.put(squares, :e3, %Figure{color: "white", type: "p"})
-    %Position{position: position, active: active, castling: castling, en_passant: en_passant, half_move: half_move, full_move: full_move} = Position.new(squares, Position.new(), %Figure{color: "white", type: "p"}, 1, "e3", false, false)
+    squares = Keyword.put(squares, :e3, figure)
+    move = %Move{squares: squares, to: "e3", figure: figure, distance: 1, is_attack: false, is_castling: false}
+
+    %Position{position: position, active: active, castling: castling, en_passant: en_passant, half_move: half_move, full_move: full_move} = Position.new(move, Position.new())
 
     assert position == "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR"
     assert active == "b"

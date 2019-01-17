@@ -6,7 +6,7 @@ defmodule Chess.Position do
   @x_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
   @y_lines [8, 7, 6, 5, 4, 3, 2, 1]
 
-  alias Chess.{Figure, Position}
+  alias Chess.{Figure, Position, Move}
 
   defstruct position: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
             active: "w",
@@ -77,18 +77,13 @@ defmodule Chess.Position do
 
   ## Examples
 
-      iex> Chess.Position.new(squares, %Chess.Position{}, figure, distance, move_to, as_attack, is_castling)
+      iex> Chess.Position.new(%Chess.Move{}, %Chess.Position{})
       %Chess.Position{}
 
   """
   def new(
-        squares,
-        %Position{active: active, castling: castling, half_move: half_move, full_move: full_move},
-        %Figure{} = figure,
-        distance,
-        move_to,
-        is_attack,
-        is_castling
+        %Move{to: to, squares: squares, figure: figure, distance: distance, is_attack: is_attack, is_castling: is_castling},
+        %Position{active: active, castling: castling, half_move: half_move, full_move: full_move}
       ) do
     position = calc_position_from_squares(squares)
 
@@ -96,7 +91,7 @@ defmodule Chess.Position do
       position: position,
       active: change_active_player(active),
       castling: check_castling(castling, is_castling),
-      en_passant: check_en_passant(figure, distance, move_to),
+      en_passant: check_en_passant(figure, distance, to),
       half_move: check_half_move(half_move, figure, is_attack),
       full_move: add_full_move(full_move, active)
     }
