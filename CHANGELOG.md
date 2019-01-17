@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Modify
 - end_move algorithm
+- code refactoring
 
 ## [0.3.1] - 2019-01-16
 ### Modify

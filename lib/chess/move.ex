@@ -27,7 +27,7 @@ defmodule Chess.Move do
             squares: []
 
   alias Chess.{Game, Move, Position, Figure}
-  use Move.{Parse, FigureRoute, Barriers, Destination, EndMove}
+  use Move.{Parse, FindFigure, RouteDistance, FigureRoute, Barriers, Destination, EndMove}
 
   @doc """
   Make new move in chess game
@@ -71,15 +71,9 @@ defmodule Chess.Move do
     end
   end
 
-  defp do_find_figure(nil, _), do: {:error, "Square does not have figure for move"}
-
-  defp do_find_figure(%Figure{color: color} = figure, active_player) do
-    if String.first(color) != active_player, do: {:error, "This is not move of #{color} player"}, else: figure
-  end
-
   # calculates route and distance for figure's move
   defp calc_route_for_figure(move, game, current_position) do
-    case calc_route_and_distance(move) do
+    case do_calc_route_and_distance(move) do
       # render error message
       {:error, message} ->
         {:error, message}
@@ -91,33 +85,8 @@ defmodule Chess.Move do
     end
   end
 
-  defp calc_route_and_distance(move) do
-    # calculate route direction
-    route = calc_route(String.split(move.from, "", trim: true), String.split(move.to, "", trim: true))
-    # calculate distance of move
-    distance = calc_distance(route)
-
-    case distance do
-      0 -> {:error, "You need to move figure somewhere"}
-      _ -> [route, distance]
-    end
-  end
-
-  defp calc_route([move_from_x, move_from_y], [to_x, to_y]) do
-    [
-      Enum.find_index(@x_fields, fn x -> x == to_x end) - Enum.find_index(@x_fields, fn x -> x == move_from_x end),
-      Enum.find_index(@y_fields, fn y -> y == to_y end) - Enum.find_index(@y_fields, fn y -> y == move_from_y end)
-    ]
-  end
-
-  defp calc_distance(route) do
-    route
-    |> Enum.map(fn x -> abs(x) end)
-    |> Enum.max()
-  end
-
   defp check_route_for_figure(move, game, current_position) do
-    case check_figure_route(move.figure, move.route, String.split(move.from, "", trim: true), current_position.castling) do
+    case do_check_figure_route(move.figure, move.route, String.split(move.from, "", trim: true), current_position.castling) do
       # render error message
       {:error, message} -> {:error, message}
       # continue
@@ -176,7 +145,7 @@ defmodule Chess.Move do
 
   # complete move
   defp complete_move(move, game, current_position) do
-    case end_move(move, game, current_position) do
+    case do_end_move(move, game, current_position) do
       # valid move
       {:ok, [status, check]} ->
         {:ok,

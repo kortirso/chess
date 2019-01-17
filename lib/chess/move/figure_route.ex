@@ -7,27 +7,27 @@ defmodule Chess.Move.FigureRoute do
 
   defmacro __using__(_opts) do
     quote do
-      defp check_figure_route(%Figure{color: color, type: "p"}, route, [_, move_from_y], _) do
+      defp do_check_figure_route(%Figure{color: color, type: "p"}, route, [_, move_from_y], _) do
         unless pion_move?(route, move_from_y, color), do: {:error, "Pion can not move like this"}
       end
 
-      defp check_figure_route(%Figure{type: "r"}, route, _, _) do
+      defp do_check_figure_route(%Figure{type: "r"}, route, _, _) do
         unless linear_move?(route), do: {:error, "Rook can not move like this"}
       end
 
-      defp check_figure_route(%Figure{type: "n"}, route, _, _) do
+      defp do_check_figure_route(%Figure{type: "n"}, route, _, _) do
         unless knight_move?(route), do: {:error, "Knight can not move like this"}
       end
 
-      defp check_figure_route(%Figure{type: "b"}, route, _, _) do
+      defp do_check_figure_route(%Figure{type: "b"}, route, _, _) do
         unless diagonal_move?(route), do: {:error, "Bishop can not move like this"}
       end
 
-      defp check_figure_route(%Figure{type: "q"}, route, _, _) do
+      defp do_check_figure_route(%Figure{type: "q"}, route, _, _) do
         unless diagonal_move?(route) || linear_move?(route), do: {:error, "Queen can not move like this"}
       end
 
-      defp check_figure_route(%Figure{color: color, type: "k"}, route, _, castling) do
+      defp do_check_figure_route(%Figure{color: color, type: "k"}, route, _, castling) do
         unless king_move?(route, castling, color), do: {:error, "King can not move like this"}
       end
 

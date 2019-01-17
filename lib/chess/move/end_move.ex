@@ -7,7 +7,7 @@ defmodule Chess.Move.EndMove do
 
   defmacro __using__(_opts) do
     quote do
-      defp end_move(move, game, current_position) do
+      defp do_end_move(move, game, current_position) do
         case game.status do
           :playing -> check_attack(move, game, current_position)
           :completed -> {:error, "The game is over"}
@@ -78,7 +78,7 @@ defmodule Chess.Move.EndMove do
 
       # try to block attacker route
       defp can_block_attackers?(move, game, current_position, opponent_king_square, attacker_square) do
-        route = calc_route(String.split(Atom.to_string(attacker_square), "", trim: true), String.split(Atom.to_string(opponent_king_square), "", trim: true))
+        route = calc_route(Atom.to_string(attacker_square), Atom.to_string(opponent_king_square))
         distance = calc_distance(route)
         squares_for_block = define_squares_for_block(attacker_square, route, distance)
 

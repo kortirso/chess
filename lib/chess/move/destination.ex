@@ -14,7 +14,7 @@ defmodule Chess.Move.Destination do
 
       # different rules for pions
       defp do_check_destination(squares, %Move{from: from, to: to, figure: %Figure{color: color, type: "p"}} = move, figure_at_the_end, en_passant) do
-        [x_route, _] = calc_route(String.split(from, "", trim: true), String.split(to, "", trim: true))
+        [x_route, _] = calc_route(from, to)
 
         cond do
           x_route == 0 && figure_at_the_end != nil ->
