@@ -13,13 +13,19 @@ defmodule Chess.Move.Destination do
         do: {:error, "Square #{to} is under control of your figure"}
 
       # different rules for pions
-      defp do_check_destination(squares, %Move{from: from, to: to, figure: %Figure{color: color, type: "p"}} = move, figure_at_the_end, en_passant) do
+      defp do_check_destination(squares, %Move{from: from, to: to, figure: %Figure{color: color, type: "p"}, promotion: promotion} = move, figure_at_the_end, en_passant) do
         [x_route, _] = calc_route(from, to)
 
         cond do
+          # invalid moving with barrier
           x_route == 0 && figure_at_the_end != nil ->
             {:error, "There are barrier for pion at the and of move"}
 
+          # invalid attack without opponent
+          x_route != 0 && figure_at_the_end == nil ->
+            {:error, "Pion must attack for diagonal move"}
+
+          # valid en_passant attack
           x_route != 0 && figure_at_the_end == nil && to == en_passant ->
             beated_pion = pion_beated_en_passant(color, to)
             squares = Keyword.delete(squares, :"#{beated_pion}")
@@ -29,9 +35,17 @@ defmodule Chess.Move.Destination do
               Keyword.put(squares, :"#{to}", move.figure)
             ]
 
-          x_route != 0 && figure_at_the_end == nil ->
-            {:error, "Pion must attack for diagonal move"}
+          # valid promotion
+          x_route == 0 && figure_at_the_end == nil && last_line_for_pion?(color, to) ->
+            squares = Keyword.delete(squares, :"#{from}")
+            [
+              false,
+              false,
+              Keyword.put(squares, :"#{to}", %Figure{color: color, type: promotion})
+            ]
 
+          # valid move without barrier
+          # valid attack with opponent
           true ->
             squares = Keyword.delete(squares, :"#{from}")
             [
@@ -79,6 +93,10 @@ defmodule Chess.Move.Destination do
           Keyword.put(squares, :"#{to}", figure)
         ]
       end
+
+      defp last_line_for_pion?("white", to), do: String.last(to) == "8"
+      defp last_line_for_pion?("black", to), do: String.last(to) == "1"
+      defp last_line_for_pion?(_, _), do: false
 
       defp pion_beated_en_passant(color, move_to) do
         y_point = String.last(move_to)

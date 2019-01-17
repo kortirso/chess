@@ -32,6 +32,7 @@ defmodule Chess.Game do
 
     - game: game object
     - value: move is represented like e2-e4
+    - promotion: if pion achives last line then it will promote to this figure
 
   ## Examples
 
@@ -41,6 +42,11 @@ defmodule Chess.Game do
       iex> Chess.Game.play(%Game{}, "e2-e5")
       {:error, ""}
 
+      iex> Chess.Game.play(%Game{}, "e7-e8", "q")
+      {:ok, %Game{}}
+
   """
-  def play(%Game{} = game, value) when is_binary(value), do: Move.new(game, value)
+  def play(%Game{} = game, value, promotion \\ "q")
+    when is_binary(value) and promotion in ["r", "n", "b", "q"],
+    do: Move.new(game, value, promotion)
 end

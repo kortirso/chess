@@ -139,6 +139,14 @@ defmodule Chess.GameTest do
     {:ok, game} = Game.play(game, "d3-d2")
     {:ok, game} = Game.play(game, "a4-a7")
 
+    # end of the real game
     assert %Game{status: :playing, check: nil} = game
+
+    # additional moves not from the real game
+    {:ok, game} = Game.play(game, "c3-c2")
+    {:ok, game} = Game.play(game, "c1-b2")
+    {:ok, game} = Game.play(game, "c2-c1", "n")
+
+    assert %Game{status: :check, check: "b"} = game
   end
 end

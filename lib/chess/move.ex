@@ -24,7 +24,8 @@ defmodule Chess.Move do
             distance: 0,
             is_attack: false,
             is_castling: false,
-            squares: []
+            squares: [],
+            promotion: ""
 
   alias Chess.{Game, Move, Position, Figure}
   use Move.{Parse, FindFigure, RouteDistance, FigureRoute, Barriers, Destination, EndMove}
@@ -42,7 +43,7 @@ defmodule Chess.Move do
 
   """
 
-  def new(%Game{} = game, value) when is_binary(value) do
+  def new(%Game{} = game, value, promotion \\ "q") when is_binary(value) and promotion in ["r", "n", "b", "q"] do
     current_position = Position.new(game.current_fen)
 
     case do_parse_move(value, current_position.active) do
@@ -52,7 +53,7 @@ defmodule Chess.Move do
 
       # continue
       [from, to] ->
-        %Move{value: value, from: from, to: to}
+        %Move{value: value, from: from, to: to, promotion: promotion}
         |> find_figure(game, current_position)
     end
   end
