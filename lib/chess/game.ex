@@ -22,7 +22,29 @@ defmodule Chess.Game do
   """
   def new do
     squares = Square.prepare_for_new_game()
+
     %Game{squares: squares}
+  end
+
+  @doc """
+  Creates a game from FEN-notation
+
+  ## Examples
+
+      iex> Chess.Game.new("FEN")
+      %Chess.Game{squares: [...]}
+
+  """
+  def new(current_fen) when is_binary(current_fen) do
+    squares = do_prepare_squares(current_fen)
+
+    %Game{squares: squares, current_fen: current_fen}
+  end
+
+  defp do_prepare_squares(current_fen) do
+    current_fen
+    |> Position.new()
+    |> Square.prepare_from_position()
   end
 
   @doc """

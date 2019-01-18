@@ -3,10 +3,10 @@ defmodule Chess.Square do
   Square module
   """
 
-  alias Chess.Figure
+  alias Chess.{Figure, Position}
 
-  @x_lines [1, 2, 7, 8]
-  @y_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
+  @x_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
+  @y_lines [1, 2, 7, 8]
 
   @doc """
   Creates 32 figures for new game and puts them to specific squares
@@ -29,8 +29,8 @@ defmodule Chess.Square do
   end
 
   # create list of square names
-  defp do_line, do: Enum.reduce(@x_lines, [], fn y, acc -> [do_line(y) | acc] end)
-  defp do_line(y), do: Enum.reduce(@y_lines, [], fn x, acc -> [{x, y} | acc] end)
+  defp do_line, do: Enum.reduce(@y_lines, [], fn y, acc -> [do_line(y) | acc] end)
+  defp do_line(y), do: Enum.reduce(@x_lines, [], fn x, acc -> [{x, y} | acc] end)
 
   # create figure for square
   defp create_figure_for_square(x, y) do
@@ -59,5 +59,58 @@ defmodule Chess.Square do
       x == "d" -> "q"
       x == "e" -> "k"
     end
+  end
+
+  @doc """
+  Creates figures for new game from existed position
+
+  ## Examples
+
+      iex> Chess.Square.prepare_from_position(position)
+      [
+        a1: %Chess.Figure{color: "w", type: "r"},
+        b1: %Chess.Figure{color: "w", type: "n"},
+        ...
+      ]
+
+  """
+  def prepare_from_position(%Position{position: position}) do
+    position
+    |> String.split("/", trim: true)
+    |> Enum.with_index()
+    |> parse_lines()
+    |> List.flatten()
+  end
+
+  defp parse_lines(lines) do
+    Enum.reduce(lines, [], fn {line, index}, acc ->
+      {result, _} = parse_line(line, index)
+      [result | acc]
+    end)
+  end
+
+  defp parse_line(line, index) do
+    line
+    |> String.codepoints()
+    |> add_figures(index)
+  end
+
+  defp add_figures(figures, index) do
+    Enum.reduce(figures, {[], 0}, fn x, {squares, inline_index} ->
+      case Integer.parse(x) do
+        :error -> {[add_figure(x, inline_index, 8 - index) | squares], inline_index + 1}
+        {number, _} -> {squares, inline_index + number}
+      end
+    end)
+  end
+
+  defp add_figure(x, x_index, y_line) do
+    type = String.downcase(x)
+    color = if type == x, do: "b", else: "w"
+
+    {
+      :"#{Enum.at(@x_lines, x_index)}#{y_line}",
+      Figure.new(color, type)
+    }
   end
 end

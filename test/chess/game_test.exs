@@ -11,6 +11,13 @@ defmodule Chess.GameTest do
     assert %Game{} = state[:game]
   end
 
+  test "create game from FEN-notation" do
+    %Game{squares: squares, current_fen: current_fen} = Game.new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+
+    assert length(squares) == 32
+    assert current_fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  end
+
   test "fool's mate", state do
     {:ok, game} = Game.play(state[:game], "f2-f3")
     {:ok, game} = Game.play(game, "e7-e6")
