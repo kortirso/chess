@@ -46,7 +46,7 @@ defmodule Chess.Move do
   def new(%Game{} = game, value, promotion \\ "q") when is_binary(value) and promotion in ["r", "n", "b", "q"] do
     current_position = Position.new(game.current_fen)
 
-    case do_parse_move(value, current_position.active) do
+    case do_parse_move(game, value, current_position.active) do
       # render error message
       {:error, message} ->
         {:error, message}

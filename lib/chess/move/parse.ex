@@ -3,16 +3,22 @@ defmodule Chess.Move.Parse do
   Module for parsing moves
   """
 
+  alias Chess.Game
+
   defmacro __using__(_opts) do
     quote do
-      defp do_parse_move(move, active) when move == "0-0" or move == "0-0-0" do
+      defp do_parse_move(%Game{status: "check", check: check}, move, active)
+        when check != active and (move == "0-0" or move == "0-0-0"),
+        do: {:error, "Your king is under attack, castling is forbidden"}
+
+      defp do_parse_move(_, move, active) when move == "0-0" or move == "0-0-0" do
         [
           define_kings_from(active),
           define_kings_to(active, move)
         ]
       end
 
-      defp do_parse_move(move, _) do
+      defp do_parse_move(_, move, _) do
         result = check_move_format(move)
         cond do
           is_binary(result) -> String.split(result, "-")
