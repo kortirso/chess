@@ -38,7 +38,7 @@ defmodule Chess.MoveTest do
     test "return error for opponent figure", state do
       {:error, message} = Game.play(state[:game], "a7-a6")
 
-      assert message == "This is not move of black player"
+      assert message == "This is not move of b player"
     end
   end
 

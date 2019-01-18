@@ -15,8 +15,8 @@ defmodule Chess.Square do
 
       iex> Chess.Square.prepare_for_new_game()
       [
-        a1: %Chess.Figure{color: "white", type: "r"},
-        b1: %Chess.Figure{color: "white", type: "n"},
+        a1: %Chess.Figure{color: "w", type: "r"},
+        b1: %Chess.Figure{color: "w", type: "n"},
         ...
       ]
 
@@ -44,8 +44,8 @@ defmodule Chess.Square do
   end
 
   # choose color based on x_line
-  defp choose_color(line) when line <= 4, do: "white"
-  defp choose_color(line) when line >= 5, do: "black"
+  defp choose_color(line) when line <= 4, do: "w"
+  defp choose_color(line) when line >= 5, do: "b"
 
   # choose type based on y_line
   defp choose_type(_, y) when y == 2 or y == 7, do: "p"

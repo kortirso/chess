@@ -15,8 +15,8 @@ defmodule Chess.Move.RouteDistance do
       end
 
       defp calc_route(from, to) do
-        [move_from_x, move_from_y] = String.split(from, "", trim: true)
-        [to_x, to_y] = String.split(to, "", trim: true)
+        [move_from_x, move_from_y] = coordinates(from)
+        [to_x, to_y] = coordinates(to)
 
         [
           Enum.find_index(@x_fields, fn x -> x == to_x end) - Enum.find_index(@x_fields, fn x -> x == move_from_x end),

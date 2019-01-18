@@ -11,10 +11,10 @@ defmodule Chess.Move do
   @diagonals [[-1, -1], [-1, 1], [1, 1], [1, -1]]
   @linears [[-1, 0], [0, 1], [1, 0], [0, -1]]
   @knights [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2]]
-  @white_pions [[1, -1], [-1, -1]]
-  @black_pions [[1, 1], [-1, 1]]
-  @white_pions_moves [[0, -1], [0, -1]]
-  @black_pions_moves [[0, 1], [0, 1]]
+  @white_pions [[1, 1], [-1, 1]]
+  @black_pions [[1, -1], [-1, -1]]
+  @white_pions_moves [[0, 1], [0, 1]]
+  @black_pions_moves [[0, -1], [0, -1]]
 
   defstruct value: "",
             from: "",
@@ -87,7 +87,7 @@ defmodule Chess.Move do
   end
 
   defp check_route_for_figure(move, game, current_position) do
-    case do_check_figure_route(move.figure, move.route, String.split(move.from, "", trim: true), current_position.castling) do
+    case do_check_figure_route(move.figure, move.route, coordinates(move.from), current_position.castling) do
       # render error message
       {:error, message} -> {:error, message}
       # continue

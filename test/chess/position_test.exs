@@ -41,7 +41,7 @@ defmodule Chess.PositionTest do
     game = Game.new()
     squares = game.squares
 
-    figure = %Figure{color: "white", type: "p"}
+    figure = %Figure{color: "w", type: "p"}
     squares = Keyword.delete(squares, :e2)
     squares = Keyword.put(squares, :e3, figure)
     move = %Move{squares: squares, to: "e3", figure: figure, distance: 1, is_attack: false, is_castling: false}

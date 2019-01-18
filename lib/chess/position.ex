@@ -133,18 +133,18 @@ defmodule Chess.Position do
     if castling == "", do: "-", else: castling
   end
 
-  defp check_en_passant(%Figure{type: type}, distance, _) when type != "p" or distance != 2 do
-    "-"
-  end
+  defp check_en_passant(%Figure{type: type}, distance, _) when type != "p" or distance != 2, do: "-"
 
-  defp check_en_passant(%Figure{color: color}, _, move_to) do
+  defp check_en_passant(%Figure{color: "w"}, _, move_to) do
     {y_point, _} = move_to |> String.last() |> Integer.parse()
 
-    if color == "white" do
-      "#{String.first(move_to)}#{y_point - 1}"
-    else
-      "#{String.first(move_to)}#{y_point + 1}"
-    end
+    "#{String.first(move_to)}#{y_point - 1}"
+  end
+
+  defp check_en_passant(%Figure{color: "b"}, _, move_to) do
+    {y_point, _} = move_to |> String.last() |> Integer.parse()
+
+    "#{String.first(move_to)}#{y_point + 1}"
   end
 
   defp check_half_move(_, %Figure{type: type}, is_attack) when type == "p" or is_attack, do: 0
@@ -184,14 +184,6 @@ defmodule Chess.Position do
 
   defp check_figure(nil), do: 1
 
-  defp check_figure(%Figure{color: color, type: type}) do
-    case color do
-      "white" ->
-        String.first(type)
-        |> String.capitalize
-
-      "black" ->
-        String.first(type)
-    end
-  end
+  defp check_figure(%Figure{color: "w", type: type}), do: String.first(type) |> String.capitalize()
+  defp check_figure(%Figure{color: "b", type: type}), do: String.first(type)
 end

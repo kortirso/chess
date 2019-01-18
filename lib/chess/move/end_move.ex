@@ -18,7 +18,7 @@ defmodule Chess.Move.EndMove do
         {
           king_square,
           king
-        } = Enum.find(move.squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && String.first(color) == current_position.active end)
+        } = Enum.find(move.squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && color == current_position.active end)
         active_figures = define_active_figures(move.squares, opponent(current_position.active))
         attackers = define_attackers(active_figures, king_square)
 
@@ -32,7 +32,7 @@ defmodule Chess.Move.EndMove do
         {
           opponent_king_square,
           opponent_king
-        } = Enum.find(move.squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && String.first(color) != current_position.active end)
+        } = Enum.find(move.squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && color != current_position.active end)
         active_figures = define_active_figures(move.squares, current_position.active)
         attackers = define_attackers(active_figures, opponent_king_square)
 
@@ -116,7 +116,7 @@ defmodule Chess.Move.EndMove do
 
       defp make_virtual_move(figures, move, game, current_position) do
         Enum.any?(figures, fn {_, from, to} ->
-          virtual_game =
+          {:ok, virtual_game} =
             %Game{
               squares: move.squares,
               current_fen: Position.new(move, current_position) |> Position.to_fen(),
@@ -124,8 +124,8 @@ defmodule Chess.Move.EndMove do
               status: :check,
               check: current_position.active
             }
+            |> Game.play("#{from}-#{to}")
 
-          {:ok, virtual_game} = Game.play(virtual_game, "#{from}-#{to}")
           virtual_game.status == :playing
         end)
       end
@@ -165,7 +165,7 @@ defmodule Chess.Move.EndMove do
           |> Enum.filter(fn x ->
             if Keyword.has_key?(squares, x) do
               %Figure{color: color} = squares[x]
-              String.first(color) == current_position.active
+              color == current_position.active
             else
               true
             end
@@ -177,13 +177,13 @@ defmodule Chess.Move.EndMove do
 
       defp define_active_figures(squares, active) do
         squares
-        |> Enum.filter(fn {_, %Figure{color: color}} -> String.first(color) == active end)
+        |> Enum.filter(fn {_, %Figure{color: color}} -> color == active end)
         |> calc_attacked_squares(squares, "attack")
       end
 
       defp define_defense_figures(squares, active, type) do
         squares
-        |> Enum.filter(fn {_, %Figure{color: color}} -> String.first(color) != active end)
+        |> Enum.filter(fn {_, %Figure{color: color}} -> color != active end)
         |> calc_attacked_squares(squares, type)
       end
 

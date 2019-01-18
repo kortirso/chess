@@ -4,9 +4,9 @@ defmodule Chess.FigureTest do
   alias Chess.Figure
 
   test "create figure" do
-    %Figure{color: color, type: type} = Figure.new("white", "p")
+    %Figure{color: color, type: type} = Figure.new("w", "p")
 
-    assert color == "white"
+    assert color == "w"
     assert type == "p"
   end
 end

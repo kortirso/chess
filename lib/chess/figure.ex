@@ -12,16 +12,16 @@ defmodule Chess.Figure do
 
   ## Options
 
-      color - white or black
+      color - w or b
       type - p (Pion), r (Rook), n (Knight), b (Bishop), q (Queen), k (King)
 
   ## Examples
 
-      iex> Chess.Figure.new("white", "p")
-      %Chess.Figure{color: "white", type: "p"}
+      iex> Chess.Figure.new("w", "p")
+      %Chess.Figure{color: "w", type: "p"}
 
   """
   def new(color, type)
-      when color in ["white", "black"] and type in ["p", "r", "n", "b", "q", "k"],
+      when color in ["w", "b"] and type in ["p", "r", "n", "b", "q", "k"],
       do: %Figure{color: color, type: type}
 end

@@ -31,15 +31,15 @@ defmodule Chess.Move.FigureRoute do
         unless king_move?(route, castling, color), do: {:error, "King can not move like this"}
       end
 
-      defp pion_move?([x_route, y_route], move_from_y, "white") do
-        abs(x_route) == 1 && y_route == 1 || x_route == 0 && (y_route == 1 || y_route == 2 && move_from_y == start_line_for_pion("white"))
+      defp pion_move?([x_route, y_route], move_from_y, "w") do
+        abs(x_route) == 1 && y_route == 1 || x_route == 0 && (y_route == 1 || y_route == 2 && move_from_y == start_line_for_pion("w"))
       end
 
       defp pion_move?([x_route, y_route], move_from_y, _) do
-        abs(x_route) == 1 && y_route == -1 || x_route == 0 && (y_route == -1 || y_route == -2 && move_from_y == start_line_for_pion("black"))
+        abs(x_route) == 1 && y_route == -1 || x_route == 0 && (y_route == -1 || y_route == -2 && move_from_y == start_line_for_pion("b"))
       end
 
-      defp start_line_for_pion("white"), do: "2"
+      defp start_line_for_pion("w"), do: "2"
       defp start_line_for_pion(_), do: "7"
 
       defp linear_move?([x_route, y_route]), do: x_route == 0 || y_route == 0
@@ -61,7 +61,7 @@ defmodule Chess.Move.FigureRoute do
       defp way_of_castling(2), do: "k"
       defp way_of_castling(_), do: "q"
 
-      defp side_of_castling(side, "white"), do: String.capitalize(side)
+      defp side_of_castling(side, "w"), do: String.capitalize(side)
       defp side_of_castling(side, _), do: side
     end
   end

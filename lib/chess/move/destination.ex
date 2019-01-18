@@ -94,14 +94,14 @@ defmodule Chess.Move.Destination do
         ]
       end
 
-      defp last_line_for_pion?("white", to), do: String.last(to) == "8"
-      defp last_line_for_pion?("black", to), do: String.last(to) == "1"
+      defp last_line_for_pion?("w", to), do: String.last(to) == "8"
+      defp last_line_for_pion?("b", to), do: String.last(to) == "1"
       defp last_line_for_pion?(_, _), do: false
 
       defp pion_beated_en_passant(color, move_to) do
         y_point = String.last(move_to)
         y_point = Enum.find_index(@y_fields, fn y -> y == y_point end)
-        coefficient = if color == "white", do: -1, else: 1
+        coefficient = if color == "w", do: -1, else: 1
         String.first(move_to) <> Enum.at(@y_fields, y_point + coefficient)
       end
 
