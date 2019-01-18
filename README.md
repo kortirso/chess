@@ -35,11 +35,20 @@ After valid move game object will contain new figure's position and FEN-notation
 
 ### Pion's promotion
 
+Add third option if pion achives last line, one from [q|n|r|b], default - q
+
 ```elixir
   Game.play(%Game{}, "e7-e8", "q")
 ```
 
-Add third option if pion achives last line, one from [q|n|r|b], default - q
+### Castling
+
+To make castling move:
+
+```elixir
+  Game.play(%Game{}, "0-0")
+  Game.play(%Game{}, "0-0-0")
+```
 
 ## TODO
 

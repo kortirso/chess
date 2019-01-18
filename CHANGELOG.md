@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Modify
 - avoiding check
 - figure color to short name
+- readme
 
 ## [0.3.3] - 2019-01-17
 ### Added
