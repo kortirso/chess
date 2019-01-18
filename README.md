@@ -10,7 +10,7 @@ by adding `chess` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:chess, "~> 0.3.4"}
+    {:chess, "~> 0.4.0"}
   ]
 end
 ```
@@ -20,7 +20,10 @@ end
 ```elixir
   alias Chess.Game
 
+  # start new game
   Game.new()
+  # or initialize game from FEN-notation
+  Game.new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 ```
 
 New game will be created with squares and figures, FEN-notation, and game's status
