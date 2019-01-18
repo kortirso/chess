@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - figure color to short name
 - readme
 - castling when is check for king is forbidden
+- castling when king moves through attacked field
 
 ## [0.3.3] - 2019-01-17
 ### Added

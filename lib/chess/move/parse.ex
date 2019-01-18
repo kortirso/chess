@@ -29,13 +29,10 @@ defmodule Chess.Move.Parse do
       defp define_kings_from("w"), do: "e1"
       defp define_kings_from(_), do: "e8"
 
-      defp define_kings_to("w", move) do
-        if move == "0-0", do: "g1", else: "c1"
-      end
-
-      defp define_kings_to(_, move) do
-        if move == "0-0", do: "g8", else: "c8"
-      end
+      defp define_kings_to("w", "0-0"), do: "g1"
+      defp define_kings_to("w", "0-0-0"), do: "c1"
+      defp define_kings_to("b", "0-0"), do: "g8"
+      defp define_kings_to("b", "0-0-0"), do: "c8"
 
       defp check_move_format(move) do
         cond do

@@ -28,7 +28,7 @@ defmodule Chess.Move do
             promotion: ""
 
   alias Chess.{Game, Move, Position, Figure}
-  use Move.{Parse, FindFigure, RouteDistance, FigureRoute, Barriers, Destination, EndMove}
+  use Move.{Parse, FindFigure, RouteDistance, FigureRoute, Barriers, CheckCastling, Destination, EndMove}
 
   @doc """
   Make new move in chess game
@@ -108,7 +108,7 @@ defmodule Chess.Move do
 
     case result do
       # continue
-      {:ok} -> check_destination(move, game, current_position)
+      {:ok} -> check_castling(move, game, current_position)
       # render error message
       _ -> result
     end
@@ -127,6 +127,18 @@ defmodule Chess.Move do
 
   defp define_rook_move_for_castling(square) when square in ["g1", "g8"], do: [[1, 0], 3]
   defp define_rook_move_for_castling(square) when square in ["c1", "c8"], do: [[-1, 0], 4]
+
+  # check attacked middle square while castling
+  defp check_castling(move, game, current_position) do
+    result = do_check_castling(move, game, current_position)
+
+    case result do
+      # continue
+      {:ok} -> check_destination(move, game, current_position)
+      # render error message
+      _ -> result
+    end
+  end
 
   # check destanation point
   defp check_destination(move, game, current_position) do
