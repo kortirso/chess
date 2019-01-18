@@ -3,9 +3,6 @@ defmodule Chess.Position do
   Position module
   """
 
-  @x_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
-  @y_lines [8, 7, 6, 5, 4, 3, 2, 1]
-
   defstruct position: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
             active: "w",
             castling: "KQkq",
@@ -154,8 +151,9 @@ defmodule Chess.Position do
   defp add_full_move(full_move, _), do: full_move
 
   defp calc_position_from_squares(squares) do
-    @y_lines
-    |> Enum.map(fn y -> check_line(@x_lines, squares, y, "", 0) end)
+    Chess.y_fields
+    |> Enum.reverse()
+    |> Enum.map(fn y -> check_line(Chess.x_fields, squares, y, "", 0) end)
     |> Enum.join("/")
   end
 

@@ -18,12 +18,11 @@ end
 ## Start new game
 
 ```elixir
-  alias Chess.Game
-
   # start new game
-  Game.new()
+  Chess.new_game()
+
   # or initialize game from FEN-notation
-  Game.new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  Chess.new_game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 ```
 
 New game will be created with squares and figures, FEN-notation, and game's status
@@ -31,7 +30,7 @@ New game will be created with squares and figures, FEN-notation, and game's stat
 ## Make move
 
 ```elixir
-  Game.play(%Game{}, "e2-e4")
+  Chess.play(%Chess.Game{}, "e2-e4")
 ```
 
 After valid move game object will contain new figure's position and FEN-notation
@@ -41,7 +40,7 @@ After valid move game object will contain new figure's position and FEN-notation
 Add third option if pion achives last line, one from [q|n|r|b], default - q
 
 ```elixir
-  Game.play(%Game{}, "e7-e8", "q")
+  Chess.play(%Chess.Game{}, "e7-e8", "q")
 ```
 
 ### Castling
@@ -49,8 +48,8 @@ Add third option if pion achives last line, one from [q|n|r|b], default - q
 To make castling move:
 
 ```elixir
-  Game.play(%Game{}, "0-0")
-  Game.play(%Game{}, "0-0-0")
+  Chess.play(%Chess.Game{}, "0-0")
+  Chess.play(%Chess.Game{}, "0-0-0")
 ```
 
 ## TODO
@@ -62,8 +61,10 @@ To make castling move:
 - [X] Castling
 - [X] Checkmate
 - [X] Checking possible checkmate for next turn
-- [ ] Draw
 - [X] Pion's promotion at last line
+- [ ] Draw
+- [ ] Using PGN
+- [ ] Manual change game's status
 
 ## Contributing
 

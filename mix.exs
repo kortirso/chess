@@ -2,7 +2,7 @@ defmodule Chess.MixProject do
   use Mix.Project
 
   @description """
-    Chess game
+  Elixir package for playing chess game
   """
 
   def project do

@@ -10,6 +10,7 @@ defmodule Chess do
 
   @indexes [0, 1, 2, 3, 4, 5, 6, 7]
 
+  # route constants
   @diagonals [[-1, -1], [-1, 1], [1, 1], [1, -1]]
   @linears [[-1, 0], [0, 1], [1, 0], [0, -1]]
   @knights [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2]]
@@ -17,6 +18,14 @@ defmodule Chess do
   @black_pions [[1, -1], [-1, -1]]
   @white_pions_moves [[0, 1], [0, 1]]
   @black_pions_moves [[0, -1], [0, -1]]
+
+  alias Chess.Game
+  
+  def new_game, do: Game.new()
+  def new_game(current_fen), do: Game.new(current_fen)
+
+  defdelegate play(game, move), to: Game
+  defdelegate play(game, move, promotion), to: Game
 
   # calls for global variables
   def x_fields, do: @x_fields
