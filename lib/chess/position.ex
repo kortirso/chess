@@ -6,14 +6,14 @@ defmodule Chess.Position do
   @x_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
   @y_lines [8, 7, 6, 5, 4, 3, 2, 1]
 
-  alias Chess.{Figure, Position, Move}
-
   defstruct position: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
             active: "w",
             castling: "KQkq",
             en_passant: "-",
             half_move: 0,
             full_move: 1
+
+  alias Chess.{Figure, Position, Move}
 
   @doc """
   Start position on the board in FEN-notation

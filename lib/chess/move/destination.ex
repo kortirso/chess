@@ -100,9 +100,9 @@ defmodule Chess.Move.Destination do
 
       defp pion_beated_en_passant(color, move_to) do
         y_point = String.last(move_to)
-        y_point = Enum.find_index(@y_fields, fn y -> y == y_point end)
+        y_point = Enum.find_index(Chess.y_fields, fn y -> y == y_point end)
         coefficient = if color == "w", do: -1, else: 1
-        String.first(move_to) <> Enum.at(@y_fields, y_point + coefficient)
+        String.first(move_to) <> Enum.at(Chess.y_fields, y_point + coefficient)
       end
 
       defp is_attack(nil), do: false

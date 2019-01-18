@@ -20,6 +20,7 @@ defmodule Chess.Move.Parse do
 
       defp do_parse_move(_, move, _) do
         result = check_move_format(move)
+
         cond do
           is_binary(result) -> String.split(result, "-")
           true -> result
@@ -42,19 +43,19 @@ defmodule Chess.Move.Parse do
       end
 
       defp check_move_squares(move) do
-        splitted_move = String.split(move, "", trim: true)
+        splitted_move = coordinates(move)
 
         cond do
-          Enum.find(@x_fields, fn x -> x == Enum.at(splitted_move, 0) end) == nil ->
+          Enum.find(Chess.x_fields, fn x -> x == Enum.at(splitted_move, 0) end) == nil ->
             {:error, "There is no such square on the board"}
 
-          Enum.find(@y_fields, fn x -> x == Enum.at(splitted_move, 1) end) == nil ->
+          Enum.find(Chess.y_fields, fn x -> x == Enum.at(splitted_move, 1) end) == nil ->
             {:error, "There is no such square on the board"}
 
-          Enum.find(@x_fields, fn x -> x == Enum.at(splitted_move, 3) end) == nil ->
+          Enum.find(Chess.x_fields, fn x -> x == Enum.at(splitted_move, 3) end) == nil ->
             {:error, "There is no such square on the board"}
 
-          Enum.find(@y_fields, fn x -> x == Enum.at(splitted_move, 4) end) == nil ->
+          Enum.find(Chess.y_fields, fn x -> x == Enum.at(splitted_move, 4) end) == nil ->
             {:error, "There is no such square on the board"}
 
           true ->

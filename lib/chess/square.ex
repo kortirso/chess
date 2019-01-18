@@ -3,10 +3,10 @@ defmodule Chess.Square do
   Square module
   """
 
-  alias Chess.{Figure, Position}
-
   @x_lines ["a", "b", "c", "d", "e", "f", "g", "h"]
   @y_lines [1, 2, 7, 8]
+
+  alias Chess.{Figure, Position}
 
   @doc """
   Creates 32 figures for new game and puts them to specific squares

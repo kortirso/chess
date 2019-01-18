@@ -53,7 +53,7 @@ To make castling move:
 ## TODO
 
 - [X] Create game
-- [ ] Create game from FEN-notation
+- [X] Create game from FEN-notation
 - [X] Figure movements
 - [X] Pion's en passant
 - [X] Castling

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Added
 - create new game from FEN-notation
+- check game's status after creating game from FEN-notation
+- utils module for commonly use functions
+
+### Modify
+- replace global variables to Chess module
 
 ## [0.3.4] - 2019-01-17
 ### Modify

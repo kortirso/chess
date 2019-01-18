@@ -3,19 +3,6 @@ defmodule Chess.Move do
   Move module
   """
 
-  @x_fields ["a", "b", "c", "d", "e", "f", "g", "h"]
-  @y_fields ["1", "2", "3", "4", "5", "6", "7", "8"]
-
-  @indexes [0, 1, 2, 3, 4, 5, 6, 7]
-
-  @diagonals [[-1, -1], [-1, 1], [1, 1], [1, -1]]
-  @linears [[-1, 0], [0, 1], [1, 0], [0, -1]]
-  @knights [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2]]
-  @white_pions [[1, 1], [-1, 1]]
-  @black_pions [[1, -1], [-1, -1]]
-  @white_pions_moves [[0, 1], [0, 1]]
-  @black_pions_moves [[0, -1], [0, -1]]
-
   defstruct value: "",
             from: "",
             to: "",
@@ -27,8 +14,9 @@ defmodule Chess.Move do
             squares: [],
             promotion: ""
 
-  alias Chess.{Game, Move, Position, Figure}
+  alias Chess.{Game, Move, Position, Figure, Utils}
   use Move.{Parse, FindFigure, RouteDistance, FigureRoute, Barriers, CheckCastling, Destination, EndMove}
+  use Utils
 
   @doc """
   Make new move in chess game

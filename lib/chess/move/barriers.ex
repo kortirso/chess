@@ -15,12 +15,10 @@ defmodule Chess.Move.Barriers do
         )
       end
 
-      defp coordinates(move_from), do: String.split(move_from, "", trim: true)
-
       defp calc_from_index([move_from_x, move_from_y]) do
         [
-          Enum.find_index(@x_fields, fn x -> x == move_from_x end),
-          Enum.find_index(@y_fields, fn x -> x == move_from_y end)
+          Enum.find_index(Chess.x_fields, fn x -> x == move_from_x end),
+          Enum.find_index(Chess.y_fields, fn x -> x == move_from_y end)
         ]
       end
 
@@ -36,7 +34,7 @@ defmodule Chess.Move.Barriers do
       defp check_squares_for_barrier(squares, [move_from_x_index, move_from_y_index], [x_direction, y_direction], distance, step) when distance > step do
         move_to_x_index = Kernel.trunc(move_from_x_index + step * x_direction)
         move_to_y_index = Kernel.trunc(move_from_y_index + step * y_direction)
-        square = "#{Enum.at(@x_fields, move_to_x_index)}#{Enum.at(@y_fields, move_to_y_index)}"
+        square = "#{Enum.at(Chess.x_fields, move_to_x_index)}#{Enum.at(Chess.y_fields, move_to_y_index)}"
 
         case squares[:"#{square}"] != nil do
           true -> {:error, "There is barrier at square #{square}"}

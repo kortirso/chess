@@ -3,7 +3,9 @@ defmodule Chess.Game do
   Game module
   """
 
-  alias Chess.{Game, Square, Move, Position}
+  alias Chess.{Game, Square, Move, Position, Utils}
+  use Game.CheckStatus
+  use Utils
 
   defstruct squares: nil,
             current_fen: Position.new |> Position.to_fen(),
@@ -36,15 +38,11 @@ defmodule Chess.Game do
 
   """
   def new(current_fen) when is_binary(current_fen) do
-    squares = do_prepare_squares(current_fen)
+    position = Position.new(current_fen)
+    squares = Square.prepare_from_position(position)
+    [status, check] = check_avoiding(squares, position.active)
 
-    %Game{squares: squares, current_fen: current_fen}
-  end
-
-  defp do_prepare_squares(current_fen) do
-    current_fen
-    |> Position.new()
-    |> Square.prepare_from_position()
+    %Game{squares: squares, current_fen: current_fen, status: status, check: check}
   end
 
   @doc """

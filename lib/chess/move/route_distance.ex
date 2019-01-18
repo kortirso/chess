@@ -19,8 +19,8 @@ defmodule Chess.Move.RouteDistance do
         [to_x, to_y] = coordinates(to)
 
         [
-          Enum.find_index(@x_fields, fn x -> x == to_x end) - Enum.find_index(@x_fields, fn x -> x == move_from_x end),
-          Enum.find_index(@y_fields, fn y -> y == to_y end) - Enum.find_index(@y_fields, fn y -> y == move_from_y end)
+          Enum.find_index(Chess.x_fields, fn x -> x == to_x end) - Enum.find_index(Chess.x_fields, fn x -> x == move_from_x end),
+          Enum.find_index(Chess.y_fields, fn y -> y == to_y end) - Enum.find_index(Chess.y_fields, fn y -> y == move_from_y end)
         ]
       end
 

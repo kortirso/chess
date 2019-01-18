@@ -17,7 +17,7 @@ defmodule Chess.Move.EndMove do
       defp check_avoiding(move, game, current_position) do
         {
           king_square,
-          king
+          _
         } = Enum.find(move.squares, fn {_, %Figure{color: color, type: type}} -> type == "k" && color == current_position.active end)
         active_figures = define_active_figures(move.squares, opponent(current_position.active))
         attackers = define_attackers(active_figures, king_square)
@@ -42,9 +42,6 @@ defmodule Chess.Move.EndMove do
           _ -> check_for_many_attackers(opponent_king_square, opponent_king, active_figures, move.squares, current_position)
         end
       end
-
-      defp opponent("w"), do: "b"
-      defp opponent(_), do: "w"
 
       defp check_for_one_attacker(move, game, current_position, opponent_king_square, opponent_king, active_figures, attackers) do
         {{attacker_square, _}, _} = Enum.at(attackers, 0)
@@ -150,7 +147,7 @@ defmodule Chess.Move.EndMove do
       defp collect_squares_with_attack([move_from_x_index, move_from_y_index], [x_direction, y_direction], distance, step, acc) when distance > step do
         move_to_x_index = Kernel.trunc(move_from_x_index + step * x_direction)
         move_to_y_index = Kernel.trunc(move_from_y_index + step * y_direction)
-        square = "#{Enum.at(@x_fields, move_to_x_index)}#{Enum.at(@y_fields, move_to_y_index)}"
+        square = "#{Enum.at(Chess.x_fields, move_to_x_index)}#{Enum.at(Chess.y_fields, move_to_y_index)}"
         acc = [square | acc]
         collect_squares_with_attack([move_from_x_index, move_from_y_index], [x_direction, y_direction], distance, step + 1, acc)
       end
@@ -175,123 +172,11 @@ defmodule Chess.Move.EndMove do
         length(possible_king_moves) > 0
       end
 
-      defp define_active_figures(squares, active) do
-        squares
-        |> Enum.filter(fn {_, %Figure{color: color}} -> color == active end)
-        |> calc_attacked_squares(squares, "attack")
-      end
-
       defp define_defense_figures(squares, active, type) do
         squares
         |> Enum.filter(fn {_, %Figure{color: color}} -> color != active end)
         |> calc_attacked_squares(squares, type)
       end
-
-      defp calc_attacked_squares(figures, squares, type) do
-        Enum.map(figures, fn x ->
-          {
-            x,
-            check_attacked_squares(squares, x, type) |> List.flatten()
-          }
-        end)
-      end
-
-      defp define_attackers(active_figures, king_square) do
-        Enum.filter(active_figures, fn {_, squares} -> king_square in squares end)
-      end
-
-      defp check_attacked_squares(squares, {square, %Figure{type: type}}, _) when type in ["k", "q"] do
-        check_diagonal_moves(squares, convert_to_indexes(square), type) ++ check_linear_moves(squares, convert_to_indexes(square), type)
-      end
-
-      defp check_attacked_squares(squares, {square, %Figure{type: "b"}}, _) do
-        check_diagonal_moves(squares, convert_to_indexes(square), "b")
-      end
-
-      defp check_attacked_squares(squares, {square, %Figure{type: "r"}}, _) do
-        check_linear_moves(squares, convert_to_indexes(square), "r")
-      end
-
-      defp check_attacked_squares(squares, {square, %Figure{type: "n"}}, _) do
-        check_knight_moves(squares, convert_to_indexes(square))
-      end
-
-      defp check_attacked_squares(squares, {square, %Figure{color: color, type: "p"}}, "attack") do
-        check_pion_attack_moves(squares, convert_to_indexes(square), color)
-      end
-
-      defp check_attacked_squares(squares, {square, %Figure{color: color, type: "p"}}, "block") do
-        check_pion_moves(squares, convert_to_indexes(square), color)
-      end
-
-      defp convert_to_indexes(square) do
-        square = Atom.to_string(square)
-        x_square_index = String.first(square)
-        y_square_index = String.last(square)
-
-        [
-          Enum.find_index(@x_fields, fn x -> x == x_square_index end),
-          Enum.find_index(@y_fields, fn x -> x == y_square_index end)
-        ]
-      end
-
-      defp check_diagonal_moves(squares, square, "k") do
-        Enum.map(@diagonals, fn route -> check_attacked_square(squares, square, route, 1, 1, []) end)
-      end
-
-      defp check_diagonal_moves(squares, square, _) do
-        Enum.map(@diagonals, fn route -> check_attacked_square(squares, square, route, 1, 7, []) end)
-      end
-
-      defp check_linear_moves(squares, square, "k") do
-        Enum.map(@linears, fn route -> check_attacked_square(squares, square, route, 1, 1, []) end)
-      end
-
-      defp check_linear_moves(squares, square, _) do
-        Enum.map(@linears, fn route -> check_attacked_square(squares, square, route, 1, 7, []) end)
-      end
-
-      defp check_knight_moves(squares, square) do
-        Enum.map(@knights, fn route -> check_attacked_square(squares, square, route, 1, 1, []) end)
-      end
-
-      defp check_pion_attack_moves(squares, square, color) do
-        routes = if color == "w", do: @white_pions, else: @black_pions
-        Enum.map(routes, fn route -> check_attacked_square(squares, square, route, 1, 1, []) end)
-      end
-
-      defp check_pion_moves(squares, square, color) do
-        routes = if color == "w", do: @white_pions_moves, else: @black_pions_moves
-        Enum.map(routes, fn route -> check_attacked_square(squares, square, route, 1, 1, []) end)
-      end
-
-      defp check_attacked_square(squares, [x_index, y_index], [x_route, y_route], current_step, limit, acc) when current_step <= limit do
-        x_square_index = x_index + x_route * current_step
-        y_square_index = y_index + y_route * current_step
-
-        if x_square_index in @indexes && y_square_index in @indexes do
-          square = :"#{Enum.at(@x_fields, x_square_index)}#{Enum.at(@y_fields, y_square_index)}"
-          acc = [square | acc]
-          # check barriers on the route
-          if Keyword.has_key?(squares, square) do
-            %Figure{type: type} = squares[square]
-            case type do
-              # calculate attacked squares behind king
-              "k" -> check_attacked_square(squares, [x_index, y_index], [x_route, y_route], current_step + 1, limit, acc)
-              # stop calculating attacked squares
-              _ -> check_attacked_square(squares, [x_index, y_index], [x_route, y_route], limit + 1, limit, acc)
-            end
-          else
-            # add empty field to attacked squares
-            check_attacked_square(squares, [x_index, y_index], [x_route, y_route], current_step + 1, limit, acc)
-          end
-        else
-          # stop calculating attacked squares
-          check_attacked_square(squares, [x_index, y_index], [x_route, y_route], limit + 1, limit, acc)
-        end
-      end
-
-      defp check_attacked_square(_, _, _, current_step, limit, acc) when current_step > limit, do: acc
     end
   end
 end
