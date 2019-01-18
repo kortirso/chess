@@ -47,7 +47,7 @@ defmodule Chess.GameTest do
 
     {:error, message} = Game.play(game, "b7-b5")
 
-    assert message == "You must avoid check"
+    assert message == "This move is invalid, king is under attack"
   end
 
   test "Kasparov-Topalov, 1999", state do

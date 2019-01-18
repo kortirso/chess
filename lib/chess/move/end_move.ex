@@ -9,9 +9,8 @@ defmodule Chess.Move.EndMove do
     quote do
       defp do_end_move(move, game, current_position) do
         case game.status do
-          :playing -> check_attack(move, game, current_position)
           :completed -> {:error, "The game is over"}
-          :check -> check_avoiding(move, game, current_position)
+          _ -> check_avoiding(move, game, current_position)
         end
       end
 
@@ -25,7 +24,7 @@ defmodule Chess.Move.EndMove do
 
         case length(attackers) do
           0 -> check_attack(move, game, current_position)
-          _ -> {:error, "You must avoid check"}
+          _ -> {:error, "This move is invalid, king is under attack"}
         end
       end
 
