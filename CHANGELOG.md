@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - defdelegate in Chess module
 
+### Modified
+- using Stream to increase performance
+
 ## [0.4.0] - 2019-01-18
 ### Added
 - create new game from FEN-notation

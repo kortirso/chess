@@ -13,12 +13,12 @@ defmodule Chess.Utils do
 
       defp define_active_figures(squares, active) do
         squares
-        |> Enum.filter(fn {_, %Figure{color: color}} -> color == active end)
+        |> Stream.filter(fn {_, %Figure{color: color}} -> color == active end)
         |> calc_attacked_squares(squares, "attack")
       end
 
       defp calc_attacked_squares(figures, squares, type) do
-        Enum.map(figures, fn x ->
+        Stream.map(figures, fn x ->
           {
             x,
             check_attacked_squares(squares, x, type) |> List.flatten()

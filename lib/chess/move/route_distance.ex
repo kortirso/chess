@@ -26,7 +26,7 @@ defmodule Chess.Move.RouteDistance do
 
       defp calc_distance(route) do
         route
-        |> Enum.map(fn x -> abs(x) end)
+        |> Stream.map(fn x -> abs(x) end)
         |> Enum.max()
       end
     end

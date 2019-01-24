@@ -89,11 +89,11 @@ defmodule Chess.Move.EndMove do
 
       defp check_attackers(move, game, current_position, attacker_square) do
         find_defenders(move.squares, current_position.active, "attack", [attacker_square])
-        |> Enum.map(fn {{square, figure}, can_attack_squares} ->
+        |> Stream.map(fn {{square, figure}, can_attack_squares} ->
           {
             figure,
             square,
-            can_attack_squares |> Enum.filter(fn x -> x == attacker_square end) |> Enum.at(0)
+            can_attack_squares |> Stream.filter(fn x -> x == attacker_square end) |> Enum.at(0)
           }
         end)
         |> make_virtual_move(move, game, current_position)
@@ -101,11 +101,11 @@ defmodule Chess.Move.EndMove do
 
       defp check_defenders(move, game, current_position, squares_for_block) do
         find_defenders(move.squares, current_position.active, "block", squares_for_block)
-        |> Enum.map(fn {{square, figure}, can_attack_squares} ->
+        |> Stream.map(fn {{square, figure}, can_attack_squares} ->
           {
             figure,
             square,
-            can_attack_squares |> Enum.filter(fn x -> x in squares_for_block end) |> Enum.at(0)
+            can_attack_squares |> Stream.filter(fn x -> x in squares_for_block end) |> Enum.at(0)
           }
         end)
         |> make_virtual_move(move, game, current_position)
@@ -130,7 +130,7 @@ defmodule Chess.Move.EndMove do
       defp find_defenders(squares, active, type, need_attack_squares) do
         squares
         |> define_defense_figures(active, type)
-        |> Enum.filter(fn {{_, %Figure{type: type}}, squares} ->
+        |> Stream.filter(fn {{_, %Figure{type: type}}, squares} ->
           type != "k" && Enum.any?(need_attack_squares, fn x -> x in squares end)
         end)
       end
@@ -159,7 +159,7 @@ defmodule Chess.Move.EndMove do
         possible_king_moves =
           check_attacked_squares(squares, {opponent_king_square, opponent_king}, "attack")
           |> List.flatten()
-          |> Enum.filter(fn x ->
+          |> Stream.filter(fn x ->
             if Keyword.has_key?(squares, x) do
               %Figure{color: color} = squares[x]
               color == current_position.active
@@ -174,7 +174,7 @@ defmodule Chess.Move.EndMove do
 
       defp define_defense_figures(squares, active, type) do
         squares
-        |> Enum.filter(fn {_, %Figure{color: color}} -> color != active end)
+        |> Stream.filter(fn {_, %Figure{color: color}} -> color != active end)
         |> calc_attacked_squares(squares, type)
       end
     end

@@ -7,10 +7,12 @@ defmodule Chess.Move.CheckCastling do
     quote do
       defp do_check_castling(move, game, current_position) do
         king_square = find_square(move.to)
-        active_figures = define_active_figures(game.squares, opponent(current_position.active))
-        attackers = define_attackers(active_figures, find_square(move.to))
 
-        case length(attackers) do
+        game.squares
+        |> define_active_figures(opponent(current_position.active))
+        |> define_attackers(find_square(move.to))
+        |> length()
+        |> case do
           0 -> {:ok}
           _ -> {:error, "Castling is forbidden, square #{king_square} is under attack"}
         end

@@ -77,7 +77,7 @@ defmodule Chess.Square do
   def prepare_from_position(%Position{position: position}) do
     position
     |> String.split("/", trim: true)
-    |> Enum.with_index()
+    |> Stream.with_index()
     |> parse_lines()
     |> List.flatten()
   end
