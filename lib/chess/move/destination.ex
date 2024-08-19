@@ -35,8 +35,17 @@ defmodule Chess.Move.Destination do
               Keyword.put(squares, :"#{to}", move.figure)
             ]
 
-          # valid promotion
+          # valid promotion without opponent
           x_route == 0 && figure_at_the_end == nil && last_line_for_pion?(color, to) ->
+            squares = Keyword.delete(squares, :"#{from}")
+            [
+              false,
+              false,
+              Keyword.put(squares, :"#{to}", %Figure{color: color, type: promotion})
+            ]
+
+          # valid promotion with opponent
+          (x_route == -1 || x_route == 1) && figure_at_the_end != nil && last_line_for_pion?(color, to) ->
             squares = Keyword.delete(squares, :"#{from}")
             [
               false,
