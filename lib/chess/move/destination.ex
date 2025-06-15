@@ -24,6 +24,7 @@ defmodule Chess.Move.Destination do
           # valid en_passant attack
           x_route != 0 && figure_at_the_end == nil && to == en_passant ->
             beated_pion = pion_beated_en_passant(color, to)
+            squares = Keyword.delete(squares, :"#{from}")
             squares = Keyword.delete(squares, :"#{beated_pion}")
             [
               true,
