@@ -21,10 +21,6 @@ defmodule Chess.Move.Destination do
           x_route == 0 && figure_at_the_end != nil ->
             {:error, "There are barrier for pion at the and of move"}
 
-          # invalid attack without opponent
-          x_route != 0 && figure_at_the_end == nil ->
-            {:error, "Pion must attack for diagonal move"}
-
           # valid en_passant attack
           x_route != 0 && figure_at_the_end == nil && to == en_passant ->
             beated_pion = pion_beated_en_passant(color, to)
@@ -34,6 +30,10 @@ defmodule Chess.Move.Destination do
               false,
               Keyword.put(squares, :"#{to}", move.figure)
             ]
+
+          # invalid attack without opponent
+          x_route != 0 && figure_at_the_end == nil ->
+            {:error, "Pion must attack for diagonal move"}
 
           # valid promotion without opponent
           x_route == 0 && figure_at_the_end == nil && last_line_for_pion?(color, to) ->
