@@ -10,7 +10,7 @@ by adding `chess` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:chess, "~> 0.4.2"}
+    {:chess, "~> 0.4.4"}
   ]
 end
 ```
