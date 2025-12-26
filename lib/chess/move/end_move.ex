@@ -113,17 +113,17 @@ defmodule Chess.Move.EndMove do
 
       defp make_virtual_move(figures, move, game, current_position) do
         Enum.any?(figures, fn {_, from, to} ->
-          {:ok, virtual_game} =
-            %Game{
-              squares: move.squares,
-              current_fen: Position.new(move, current_position) |> Position.to_fen(),
-              history: [],
-              status: :check,
-              check: current_position.active
-            }
-            |> Game.play("#{from}-#{to}")
-
-          virtual_game.status == :playing
+          case %Game{
+                 squares: move.squares,
+                 current_fen: Position.new(move, current_position) |> Position.to_fen(),
+                 history: [],
+                 status: :check,
+                 check: current_position.active
+               }
+               |> Game.play("#{from}-#{to}") do
+            {:ok, virtual_game} -> virtual_game.status == :playing
+            {:error, _reason} -> false
+          end
         end)
       end
 

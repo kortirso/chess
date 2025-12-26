@@ -59,6 +59,24 @@ defmodule Chess.GameTest do
     assert message == "This move is invalid, king is under attack"
   end
 
+  test "make_virtual_move handles error tuple during check validation" do
+    # This position triggers a MatchError in make_virtual_move/4 if error tuples
+    # from Game.play are not handled properly during check validation.
+    # Previously crashed with: ** (MatchError) no match of right hand side value:
+    # {:error, "There is barrier at square e1"}
+    #
+    # The bug occurred during virtual move simulation when checking if a piece
+    # could block or capture an attacker. The fix handles {:error, _} tuples
+    # gracefully instead of crashing.
+    fen = "3rk2r/ppp1bppp/2n5/8/6b1/5q2/PPP2P1P/R2RK3 b k - 11 18"
+    game = Game.new(fen)
+
+    # This move should succeed without crashing - it's actually checkmate
+    {:ok, game} = Game.play(game, "f3-h1")
+
+    assert %Game{status: :completed, check: "b"} = game
+  end
+
   test "Kasparov-Topalov, 1999", state do
     {:ok, game} = Game.play(state[:game], "e2-e4")
     {:ok, game} = Game.play(game, "d7-d6")
